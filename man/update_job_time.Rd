@@ -4,7 +4,7 @@
 \alias{update_job_time}
 \title{Update Job Time}
 \usage{
-update_job_time(JOB_TIME)
+update_job_time(JOB_TIME_MINUTES)
 }
 \arguments{
 \item{JOB_TIME}{New job time to set.}
