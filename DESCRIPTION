@@ -1,0 +1,10 @@
+Package: RSessionHelper
+Title: Manage R Sessions for Slurm Jobs
+Version: 0.0.0.9000
+Authors@R: c(
+    person("Lech", "Kaczmarczyk", email = "lecka@liu.se", role = c("aut", "cre")))
+)Description: Manage R Sessions for Slurm Jobs
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.2
