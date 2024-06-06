@@ -1,48 +1,52 @@
-#' Submit the Current R Script to Slurm for Execution
+#' Submit the Running R Script to Slurm for Execution
 #'
-#' This function automatically submits the currently running R script to a Slurm-managed cluster
-#' using a predefined Slurm script named 'run_loop.sh'. The function assumes that the Slurm script
-#' is available in the system's PATH and is properly configured to accept an R script as a parameter.
-#' The function can optionally redirect the output of the Slurm job to a specified file.
+#' This function submits the currently running R script to a Slurm-managed cluster.
+#' It uses a predefined Slurm script (`run_loop.sh`) assumed to be available in the system's PATH.
+#' The function automatically retrieves the name of the running script and submits it to Slurm,
+#' which makes the script handling secure and error-free.
 #'
-#' @param output_file An optional string specifying the file path where the Slurm job output should be redirected.
-#'        If not specified, the output will be handled according to the Slurm script's configuration.
+#' @param output_file Optional; specifies the file path where the Slurm job output should be redirected.
+#'        If not specified, the output will be displayed in the console.
 #' @return The function does not return a value but prints the submission status to the console.
 #'         It is designed for interactive use to allow dynamic job control.
 #' @export
 #' @examples
-#' # Submit the current script to Slurm, outputting to the console
+#' # Submit the currently running script to Slurm, outputting to the console
 #' run_slurm()
 #'
 #' # Submit the current script to Slurm, redirecting output to 'job_output.txt'
 #' run_slurm("job_output.txt")
 run_slurm <- function(output_file = NULL) {
-    script_name <- get_script_name()
-    if (is.null(script_name)) {
-        cat("This function must be run from an R script file, not interactively.\n")
-        return(invisible(NULL))
+
+    args <- commandArgs(trailingOnly = FALSE)
+    script_index <- grep("--file=", args, fixed = TRUE)
+    if (length(script_index) > 0) {
+        script_name <- sub("--file=", "", args[script_index])
+    } else {
+        stop("The script name could not be auto-detected. Ensure this is run from an R script.")
     }
 
     slurm_script_name <- "run_loop.sh"  # Assuming the slurm script name is fixed and in PATH
 
-    # Prepare the command arguments
+    # Prepare the command
     args <- c(script_name)
 
     # Prepare output handling
     if (!is.null(output_file)) {
+        # Redirect both stdout and stderr to the output file
         stdout <- output_file
+        stderr <- output_file
     } else {
-        stdout <- ""  # Capturing the output to return or print later
+        # Default to console output for both stdout and stderr
+        stdout <- ""
+        stderr <- ""
     }
 
     cat("Submitting '", script_name, "' to Slurm...\n", sep = "")
-    output <- system2(slurm_script_name, args = args, stdout = stdout, stderr = TRUE)
+    system2(slurm_script_name, args = args, stdout = stdout, stderr = stderr)
 
-    # Optionally print the output if not redirected to a file
-    if (is.null(output_file)) {
-        cat(output, sep = "\n")
-    }
 }
 
-# Usage
-# run_slurm()
+# Example Usage:
+# Correct use: run_slurm()
+# Redirect output to a file: run_slurm("output.txt")

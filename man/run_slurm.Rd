@@ -2,26 +2,26 @@
 % Please edit documentation in R/run_slurm.R
 \name{run_slurm}
 \alias{run_slurm}
-\title{Submit the Current R Script to Slurm for Execution}
+\title{Submit the Running R Script to Slurm for Execution}
 \usage{
 run_slurm(output_file = NULL)
 }
 \arguments{
-\item{output_file}{An optional string specifying the file path where the Slurm job output should be redirected.
-If not specified, the output will be handled according to the Slurm script's configuration.}
+\item{output_file}{Optional; specifies the file path where the Slurm job output should be redirected.
+If not specified, the output will be displayed in the console.}
 }
 \value{
 The function does not return a value but prints the submission status to the console.
         It is designed for interactive use to allow dynamic job control.
 }
 \description{
-This function automatically submits the currently running R script to a Slurm-managed cluster
-using a predefined Slurm script named 'run_loop.sh'. The function assumes that the Slurm script
-is available in the system's PATH and is properly configured to accept an R script as a parameter.
-The function can optionally redirect the output of the Slurm job to a specified file.
+This function submits the currently running R script to a Slurm-managed cluster.
+It uses a predefined Slurm script (`run_loop.sh`) assumed to be available in the system's PATH.
+The function automatically retrieves the name of the running script and submits it to Slurm,
+which makes the script handling secure and error-free.
 }
 \examples{
-# Submit the current script to Slurm, outputting to the console
+# Submit the currently running script to Slurm, outputting to the console
 run_slurm()
 
 # Submit the current script to Slurm, redirecting output to 'job_output.txt'
