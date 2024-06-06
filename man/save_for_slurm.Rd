@@ -2,16 +2,18 @@
 % Please edit documentation in R/ManageSessions.R
 \name{save_for_slurm}
 \alias{save_for_slurm}
-\title{Save Current R Session for Slurm Execution}
+\title{Save the current R session for Slurm execution and log session info}
 \usage{
 save_for_slurm(session_file_name = NULL)
 }
 \arguments{
-\item{session_file_name}{String; the filename where the session should be saved. Defaults to the first command line argument.}
+\item{session_file_name}{String; the filename where the session should be saved.}
+
+\item{timestamp}{String; a timestamp to append to the session info file, default is current datetime if not provided.}
 }
 \description{
 Saves the current R session into a file, allowing for future continuation in Slurm job executions.
-It aborts if run in an interactive session.
+Additionally, it saves session information into a text file appended with a timestamp.
 }
 \examples{
 save_for_slurm()
