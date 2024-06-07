@@ -2,16 +2,18 @@
 % Please edit documentation in R/ManageSessions.R
 \name{InitNow}
 \alias{InitNow}
-\title{Initialize Environment After Slurm Execution#'}
+\title{Initialize Environment After Slurm Execution}
 \usage{
 InitNow(session_file_name = NULL)
 }
 \arguments{
-\item{session_file_name}{String; the name of the session file to load. Defaults to the first command line argument.}
+\item{session_file_name}{String; the name of the session file to load.
+Defaults to the first command line argument.}
 }
 \description{
 This function loads an R session file if it exists and is specifically tailored for use in a Slurm environment.
-It aborts if run in an interactive session.
+It aborts if run in an interactive session. If the specified session file does not exist, the function will continue
+without loading it, ensuring that the R environment is still initialized properly.
 }
 \examples{
 InitNow()

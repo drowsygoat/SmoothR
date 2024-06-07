@@ -1,8 +1,10 @@
-#' Initialize Environment After Slurm Execution#'
+#' Initialize Environment After Slurm Execution
 #'
 #' This function loads an R session file if it exists and is specifically tailored for use in a Slurm environment.
-#' It aborts if run in an interactive session.
-#' @param session_file_name String; the name of the session file to load. Defaults to the first command line argument.
+#' It aborts if run in an interactive session. If the specified session file does not exist, the function will continue
+#' without loading it, ensuring that the R environment is still initialized properly.
+#' @param session_file_name String; the name of the session file to load.
+#' Defaults to the first command line argument.
 #' @examples
 #' InitNow()
 #' @export
@@ -11,32 +13,33 @@ InitNow <- function(session_file_name = NULL) {
         stop("This function is not available in interactive mode.")
     }
 
+    # Fetch command line arguments if no session file name is provided
     if (is.null(session_file_name)) {
         args <- commandArgs(trailingOnly = TRUE)
         if (length(args) > 0) {
             session_file_name <- paste(args[1], ".RData")
+            output_dir <- args[1]  # Assuming the first argument is also the output directory
         } else {
-            stop("No session file name found. Something is wrong.")
+            stop("Something is messed up, there were not args detected.")
         }
     }
-    output_dir <- args[1]
+
+    # Check if the output directory exists
     if (!dir.exists(output_dir)) {
-        stop("Output directory does not exist.")
+        stop("Output directory does not exist. Something's rotten in the State of Denkark")
     }
 
+    # Change working directory to the output directory
     setwd(output_dir)
     message("Switched to directory: ", output_dir)
 
-
+    # Load the session file if it exists
     if (file.exists(session_file_name)) {
         load(session_file_name)
         message("Session file '", session_file_name, "' loaded successfully.")
     } else {
-        stop("Session file does not exist.")
+        message("Session file '", session_file_name, "' does not exist. Continuing without it.")
     }
-
-    setwd(file.path(getwd(), output_dir))
-
 }
 
 #' Quit R when not interactive
