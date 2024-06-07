@@ -11,9 +11,9 @@ InitNow(session_file_name = NULL)
 Defaults to the first command line argument.}
 }
 \description{
-This function loads an R session file if it exists and is specifically tailored for use in a Slurm environment.
+This function loads an R session file if it exists.
 It aborts if run in an interactive session. If the specified session file does not exist, the function will continue
-without loading it, ensuring that the R environment is still initialized properly.
+without loading it, ensuring that the show goes on.
 }
 \examples{
 InitNow()

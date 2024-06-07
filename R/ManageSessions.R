@@ -1,8 +1,8 @@
 #' Initialize Environment After Slurm Execution
 #'
-#' This function loads an R session file if it exists and is specifically tailored for use in a Slurm environment.
+#' This function loads an R session file if it exists.
 #' It aborts if run in an interactive session. If the specified session file does not exist, the function will continue
-#' without loading it, ensuring that the R environment is still initialized properly.
+#' without loading it, ensuring that the show goes on.
 #' @param session_file_name String; the name of the session file to load.
 #' Defaults to the first command line argument.
 #' @examples
@@ -26,7 +26,7 @@ InitNow <- function(session_file_name = NULL) {
 
     # Check if the output directory exists
     if (!dir.exists(output_dir)) {
-        stop("Output directory does not exist. Something's rotten in the State of Denkark")
+        stop("Output directory does not exist. Something's rotten in the State of Denmark")
     }
 
     # Change working directory to the output directory
@@ -37,15 +37,17 @@ InitNow <- function(session_file_name = NULL) {
     if (file.exists(session_file_name)) {
         load(session_file_name)
         message("Session file '", session_file_name, "' loaded successfully.")
+        checkpoint(paste("Session file '", session_file_name, "' loaded successfully."))
     } else {
         message("Session file '", session_file_name, "' does not exist. Continuing without it.")
+        checkpoint(paste("Session file '", session_file_name, "' does not exist. Continuing without it."))
     }
 }
 
 #' Quit R when not interactive
 #'
 #' This function terminates the current R session and exits with status 0, indicating successful completion.
-#' It is particularly useful for scripting and batch processing in environments like Slurm.
+#' It is particularly useful for scripting and batch processing when you want to run the script up to a point (practically equivalent to commenting the remained of the script). Remember to combine with a function SaveNow, as QuitNow does not save anything, just exits!
 #'
 #' @examples
 #' QuitNow()

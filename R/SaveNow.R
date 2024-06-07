@@ -7,10 +7,10 @@
 #' @param timestamp String; a timestamp to append to the session info file, default is current datetime if not provided.
 #' @importFrom sessioninfo session_info
 #' @examples
-#' SaveMe()
+#' SaveNow()
 #' @export
 
-SaveMe <- function(session_file_name = NULL) {
+SaveNow <- function(session_file_name = NULL) {
 
     requireNamespace("sessioninfo", quietly = TRUE)
 
