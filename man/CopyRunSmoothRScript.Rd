@@ -2,7 +2,7 @@
 % Please edit documentation in R/ActivateSmoothR.R
 \name{CopyRunSmoothRScript}
 \alias{CopyRunSmoothRScript}
-\title{Copy RunSmoothR.sh Script to a Specified Directory}
+\title{Copy runSmoothR.sh Script to a Specified Directory}
 \usage{
 CopyRunSmoothRScript(dest_folder)
 }
@@ -10,6 +10,6 @@ CopyRunSmoothRScript(dest_folder)
 \item{dest_folder}{The destination folder where the script will be copied.}
 }
 \description{
-This function copies the 'RunSmoothR.sh' script from the 'shell_helpers' folder
+This function copies the 'runSmoothR.sh' script from the 'shell_helpers' folder
 of the package to a specified folder.
 }

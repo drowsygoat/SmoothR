@@ -2,7 +2,7 @@
 % Please edit documentation in R/ActivateSmoothR.R
 \name{ActivateSmoothR}
 \alias{ActivateSmoothR}
-\title{Activate RunSmoothR.sh by Copying and Adding to $PATH}
+\title{Activate runSmoothR.sh by Copying and Adding to $PATH}
 \usage{
 ActivateSmoothR(dest_folder)
 }
@@ -10,7 +10,7 @@ ActivateSmoothR(dest_folder)
 \item{dest_folder}{The directory to which the script will be copied and added to $PATH.}
 }
 \description{
-This function copies 'RunSmoothR.sh' to a specified directory and adds the directory
+This function copies 'runSmoothR.sh' to a specified directory and adds the directory
 to the $PATH variable by updating the appropriate shell configuration file,
 only if the path is not already present.
 }
