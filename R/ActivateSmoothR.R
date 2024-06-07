@@ -47,7 +47,7 @@ ActivateSmoothR <- function(dest_folder) {
 #'
 #' @param dest_folder The destination folder where the script will be copied.
 CopyRunSmoothRScript <- function(dest_folder) {
-  package_directory <- system.file("shell_helpers/runSmoothR.sh", package = "SmoothR")
+  package_directory <- system.file("shell_helpers", package = "SmoothR")
   script_path <- file.path(package_directory, "RunSmoothR.sh")
   
   if (!file.exists(script_path)) {
