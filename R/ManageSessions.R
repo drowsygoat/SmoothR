@@ -14,12 +14,12 @@ InitNow <- function(session_file_name = NULL) {
     if (is.null(session_file_name)) {
         args <- commandArgs(trailingOnly = TRUE)
         if (length(args) > 0) {
-            session_file_name <- args[1]
+            session_file_name <- paste(args[1], ".RData")
         } else {
-            stop("No session file name provided.")
+            stop("No session file name found. Something is wrong.")
         }
     }
-
+    output_dir <- args[1]
     if (!dir.exists(output_dir)) {
         stop("Output directory does not exist.")
     }
