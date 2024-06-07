@@ -11,15 +11,5 @@
 #' checkpoint("Data loaded successfully")
 #' checkpoint("Model training started")
 checkpoint <- function(comment) {
-    cat(sprintf("CHECKPOINT_%s\n", comment))
-}
-
-get_script_name <- function() {
-    args <- commandArgs(trailingOnly = FALSE)
-    script_index <- grep("--file=", args, fixed = TRUE)
-    if (length(script_index) > 0) {
-        script_name <- sub("--file=", "", args[script_index])
-        return(script_name)
-    }
-    return(NULL)
+    cat(sprintf("CHECKPOINT_%s\n", comment)) # change to sth less common
 }
