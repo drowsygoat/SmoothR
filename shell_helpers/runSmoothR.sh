@@ -100,16 +100,14 @@ check_file() {
             last_keyword_found=$(grep -o "$KEYWORD" "$OUTPUT_FILE" | tail -1)
             echo "$last_keyword_found"
             tput setaf 3 # yellow ;)
-            echo "dfghdgfhh"
+            echo "$(echo $last_keyword_found | sed 's/CHECKPOINT_//g')"
             tput sgr 0
             echo -n "Monitoring job status for Job ID: $current_status" # single instance below dots    
             current_count=$((current_count + 1))
-
             fi
         fi
     fi
 }
-                            # echo "$(echo $last_keyword_found | sed 's/CHECKPOINT_//g')"
 
 function print_job_status() {
     current_status=$(sacct --brief --jobs $JOB_ID | awk -v job_id="$JOB_ID" '$1 == job_id {print $1, $2}')
@@ -145,22 +143,18 @@ SBATCH_SCRIPT="${OUTPUT_DIR}/slurm_reports/slurm_submission_${TIMESTAMP}.sh"
 
 cat <<EOF > "$SBATCH_SCRIPT"
 #!/bin/bash -eu
-#SBATCH -A $COMPUTE_ACCOUNT_LECH # update if needed!
-#SBATCH -J ${OUTPUT_DIR} # job name
-#SBATCH -o ${OUTPUT_DIR}/slurm_reports/%x_%j_${TIMESTAMP}.out # output file
+#SBATCH -A $COMPUTE_ACCOUNT
+#SBATCH -J ${OUTPUT_DIR}
+#SBATCH -o ${OUTPUT_DIR}/slurm_reports/%x_%j_${TIMESTAMP}.out
 #SBATCH -t $JOB_TIME # job time
-#SBATCH -e ${OUTPUT_DIR}/slurm_reports/%x_%j_${TIMESTAMP}.err # error file
-#SBATCH -p $PARTITION # partition
-#SBATCH -n $NUM_THREADS # number of threads
+#SBATCH -e ${OUTPUT_DIR}/slurm_reports/%x_%j_${TIMESTAMP}.err
+#SBATCH -p $PARTITION
+#SBATCH -n $NUM_THREADS
 #SBATCH --mail-user=example@email.com
 #SBATCH --mail-type=ALL
 
-# Load R module(s), if not loaded by default
-
 module load R/4.1.1
 module load R_packages/4.1.1
-
-# Run the R script and redirect output to a file
 
 ./\$R_SCRIPT \$OUTPUT_DIR \$R_SCRIPT \$SUFFIX \$TIMESTAMP \$NUM_THREADS \$ARGUMENTS 2>&1 | tee \$OUTPUT_DIR/R_console_output/R_output_\$TIMESTAMP.log >> \$OUTPUT_DIR/R_output_cumulative.log
 EOF
