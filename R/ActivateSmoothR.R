@@ -1,4 +1,4 @@
-#' Activate RunSmoothR.sh by Copying and Adding to $PATH
+#' Activate runSmoothR.sh by Copying and Adding to $PATH
 #'
 #' This function copies 'runSmoothR.sh' to a specified directory and adds the directory
 #' to the $PATH variable by updating the appropriate shell configuration file,
@@ -54,6 +54,6 @@ CopyRunSmoothRScript <- function(dest_folder) {
     stop("Script 'runSmoothR.sh' does not exist in the package.")
   }
   
-  file.copy(script_path, file.path(dest_folder, "RunSmoothR.sh"))
+  file.copy(script_path, file.path(dest_folder, "runSmoothR.sh"))
   cat("Script copied to:", dest_folder, "\n")
 }
