@@ -1,7 +1,7 @@
-# Update the Number of Threads
-#
-# @param NUM_THREADS New number of threads to set.
-# @export
+#' Update the Number of Threads
+#'
+#' @param NUM_THREADS New number of threads to set.
+#' @export
 UpdateNumThreads <- function(NUM_THREADS) {
     if (!interactive()) {
         cat("This function can only be run in an interactive R session.\n")
@@ -10,10 +10,10 @@ UpdateNumThreads <- function(NUM_THREADS) {
     UpdateConfig("NUM_THREADS", NUM_THREADS)
 }
 
-# Update Job Time
-#
-# @param JOB_TIME New job time to set.
-# @export
+#' Update Job Time
+#'
+#' @param JOB_TIME New job time to set.
+#' @export
 UpdateJobTime <- function(JOB_TIME_MINUTES) {
     if (!interactive()) {
         cat("This function can only be run in an interactive R session.\n")
@@ -27,10 +27,10 @@ UpdateJobTime <- function(JOB_TIME_MINUTES) {
     UpdateConfig("JOB_TIME", JOB_TIME)
 }
 
-# Update Output Directory
-#
-# @param OUTPUT_DIR New output directory to set.
-# @export
+#' Update Output Directory
+#'
+#' @param OUTPUT_DIR New output directory to set.
+#' @export
 UpdateOutputDir <- function(OUTPUT_DIR) {
     if (!interactive()) {
         cat("This function can only be run in an interactive R session.\n")
@@ -39,10 +39,10 @@ UpdateOutputDir <- function(OUTPUT_DIR) {
     UpdateConfig("OUTPUT_DIR", OUTPUT_DIR)
 }
 
-# Update Job Partition
-#
-# @param PARTITION New partition to set.
-# @export
+#' Update Job Partition
+#'
+#'@param PARTITION New partition to set.
+#' @export
 UpdatePartition <- function(PARTITION) {
     if (!interactive()) {
         cat("This function can only be run in an interactive R session.\n")
@@ -51,10 +51,10 @@ UpdatePartition <- function(PARTITION) {
     UpdateConfig("PARTITION", PARTITION)
 }
 
-# Update File Suffix
-#
-# @param SUFFIX New suffix for the files to set.
-# @export
+#' Update File Suffix
+#'
+#' @param SUFFIX New suffix for the files to set.
+#' @export
 UpdateSuffix <- function(SUFFIX) {
     if (!interactive()) {
         cat("This function can only be run in an interactive R session.\n")
@@ -63,18 +63,18 @@ UpdateSuffix <- function(SUFFIX) {
     UpdateConfig("SUFFIX", SUFFIX)
 }
 
-# Convert Timestamp to Human-Readable Format
-#
-# This internal function takes a timestamp in the format "YYYYMMDD_HHMMSS" and converts it
-# to a more human-readable form, "YYYY-MM-DD HH:MM:SS". This function is not exported and is intended
-# for internal package use only.
-#
-# @param timestamp A character string of the timestamp in "YYYYMMDD_HHMMSS" format.
-# @return A human-readable datetime string in "YYYY-MM-DD HH:MM:SS" format.
-# @examples
-# convert_timestamp("20240606_202103")
-# @importFrom lubridate ymd_hms
-# @noRd
+#' Convert Timestamp to Human-Readable Format
+#'
+#' This internal function takes a timestamp in the format "YYYYMMDD_HHMMSS" and converts it
+#' to a more human-readable form, "YYYY-MM-DD HH:MM:SS". This function is not exported and is intended
+#' for internal package use only.
+#'
+#' @param timestamp A character string of the timestamp in "YYYYMMDD_HHMMSS" format.
+#' @return A human-readable datetime string in "YYYY-MM-DD HH:MM:SS" format.
+#' @examples
+#' convert_timestamp("20240606_202103")
+#' @importFrom lubridate ymd_hms
+#' @noRd
 ConvertTimestamp <- function(timestamp) {
     if (!grepl("^\\d{8}_\\d{6}$", timestamp)) {
         stop("Invalid timestamp format. Expected 'YYYYMMDD_HHMMSS'.")
@@ -88,34 +88,19 @@ ConvertTimestamp <- function(timestamp) {
     return(lubridate::ymd_hms(datetime))
 }
 
-# Set Environment Configuration Interactively
-#
-# This function prompts the user for various configuration settings,
-# converts job time from minutes to a formatted string (D-H:M:S),
-# and writes these settings to a shell script configuration file in the user's home directory.
-# The file is intended to be sourced by a shell to export environment variables.
-#
-# @param None Parameters are gathered interactively.
-#
-# @return No return value; the function writes to a file and prints the file path and contents.
-# @export
-# @examples
-# set_config_interactively() # Run this in an interactive R session
-
-
 #' Set Environment Configuration Interactively
-#'
+#
 #' This function prompts the user for various configuration settings,
 #' converts job time from minutes to a formatted string (D-H:M:S),
 #' and writes these settings to a shell script configuration file in the user's home directory.
 #' The file is intended to be sourced by a shell to export environment variables.
-#'
+#
 #' @param None Parameters are gathered interactively.
-#'
+#
 #' @return No return value; the function writes to a file and prints the file path and contents.
 #' @export
 #' @examples
-#' set_config_interactively() # Run this in an interactive R session
+#' set_config_interactively() Run this in an interactive R session
 
 SetConfig <- function() {
     if (!interactive()) {
@@ -125,14 +110,14 @@ SetConfig <- function() {
     home_dir <- Sys.getenv("HOME")
     config_path <- file.path(home_dir, ".temp_shell_exports")
 
-    # Prompt user for input and provide default values
+    #' Prompt user for input and provide default values
     NUM_THREADS <- readline(prompt = "Enter the number of threads (default 1): ")
     NUM_THREADS <- ifelse(NUM_THREADS == "", "1", NUM_THREADS)
 
     JOB_TIME_MINUTES <- readline(prompt = "Enter the job time in minutes (default 5): ")
     JOB_TIME_MINUTES <- ifelse(JOB_TIME_MINUTES == "", 5, as.numeric(JOB_TIME_MINUTES))
 
-    # Convert minutes to D-H:M:S format
+    #' Convert minutes to D-H:M:S format
     hours <- JOB_TIME_MINUTES %/% 60
     days <- hours %/% 24
     hours <- hours %% 24
@@ -150,11 +135,11 @@ SetConfig <- function() {
 
     FAT <- "F"
 
-    # Construct the content to write to the config file
+    #' Construct the content to write to the config file
     config_content <- sprintf("export NUM_THREADS='%s'\nexport JOB_TIME='%s'\nexport OUTPUT_DIR='%s'\nexport PARTITION='%s'\nexport SUFFIX='%s'",
                               NUM_THREADS, JOB_TIME, OUTPUT_DIR, PARTITION, SUFFIX)
 
-    # Write to the config file
+    #' Write to the config file
     writeLines(config_content, config_path)
     cat("Config file created/updated at:", config_path, "\n")
     cat("Config file content:\n")
@@ -204,14 +189,13 @@ UpdateConfig <- function(key, value) {
 #'
 #' @param fat_value Optional value for the FAT setting; default NULL means no update.
 #' @export
-
 AddFat <- function(fat_value = NULL) {
     home_dir <- Sys.getenv("HOME")
     config_path <- file.path(home_dir, ".temp_shell_exports")
 
     # Check if the configuration file exists
     if (!file.exists(config_path)) {
-        stop("Config file does not exist. Please run SetConfigInteractively or a similar function first.")
+        stop("Config file does not exist. Please run SetConfig() or a similar function first.")
     }
 
     # Read the existing configuration
@@ -219,7 +203,7 @@ AddFat <- function(fat_value = NULL) {
 
     if (!is.null(fat_value)) {
         # Validate the fat_value input
-        stopifnot('Incorrect input; valid values are "T" or "F".' = tolower(fat_value) %in% c("t", "f"))  # Check for valid input
+        stopifnot('Incorrect input; valid values are "T" or "F".' = tolower(fat_value) %in% c("t", "f"))  #' Check for valid input
 
         # Normalize to upper case if valid
         fat_value <- toupper(fat_value)

@@ -27,6 +27,7 @@ handle_warning <- function(w) {
 #' The function utilizes a custom checkpoint system to manage and log all issues.
 #' @param expr An expression to evaluate.
 #' @keywords internal
+#' @export
 SafeExecute <- function(expr) {
     tryCatch(eval(expr), error = handle_error, warning = handle_warning)
 }

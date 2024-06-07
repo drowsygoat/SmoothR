@@ -2,7 +2,11 @@
 % Please edit documentation in R/helpers.R
 \name{SetConfig}
 \alias{SetConfig}
-\title{Set Environment Configuration Interactively}
+\title{Set Environment Configuration Interactively
+This function prompts the user for various configuration settings,
+converts job time from minutes to a formatted string (D-H:M:S),
+and writes these settings to a shell script configuration file in the user's home directory.
+The file is intended to be sourced by a shell to export environment variables.}
 \usage{
 SetConfig()
 }
@@ -13,11 +17,16 @@ SetConfig()
 No return value; the function writes to a file and prints the file path and contents.
 }
 \description{
+Set Environment Configuration Interactively
 This function prompts the user for various configuration settings,
 converts job time from minutes to a formatted string (D-H:M:S),
 and writes these settings to a shell script configuration file in the user's home directory.
 The file is intended to be sourced by a shell to export environment variables.
 }
 \examples{
-set_config_interactively() # Run this in an interactive R session
+set_config_interactively() Run this in an interactive R session
+Prompt user for input and provide default values
+Convert minutes to D-H:M:S format
+Construct the content to write to the config file
+Write to the config file
 }

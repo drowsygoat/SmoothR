@@ -31,7 +31,7 @@ ActivateRunSmoothR <- function(dest_folder) {
         existing_paths <- strsplit(Sys.getenv("PATH"), ":")[[1]]
         if (!(full_path %in% existing_paths)) {
             # Append the path to the configuration file, ensuring to add it on a new line
-            writeLines(c("\n", path_addition), target_file, useBytes = TRUE, append = TRUE)
+            writeLines(c("\n", path_addition), target_file, useBytes = TRUE)
             cat("Updated", target_file, "with new PATH\n")
         } else {
             cat("The path is already included in the PATH variable.\n")
