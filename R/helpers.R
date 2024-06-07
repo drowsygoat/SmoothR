@@ -148,7 +148,7 @@ SetConfig <- function() {
     SUFFIX <- readline(prompt = "Enter the suffix for the files (default 'suffix'): ")
     SUFFIX <- ifelse(SUFFIX == "", "suffix", SUFFIX)
 
-    FAT <- ifelse(FAT == "F")
+    FAT <- "F"
 
     # Construct the content to write to the config file
     config_content <- sprintf("export NUM_THREADS='%s'\nexport JOB_TIME='%s'\nexport OUTPUT_DIR='%s'\nexport PARTITION='%s'\nexport SUFFIX='%s'",
