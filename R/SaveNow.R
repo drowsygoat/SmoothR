@@ -7,10 +7,10 @@
 #' @param timestamp String; a timestamp to append to the session info file, default is current datetime if not provided.
 #' @importFrom sessioninfo session_info
 #' @examples
-#' SaveMe()
+#' SaveNow()
 #' @export
 
-SaveMe <- function(session_file_name = NULL) {
+SaveNow <- function(session_file_name = NULL) {
 
     requireNamespace("sessioninfo", quietly = TRUE)
 
@@ -23,7 +23,7 @@ SaveMe <- function(session_file_name = NULL) {
         if (length(args) > 0) {
             session_file_name <- paste0(args[1], "Data")
         } else {
-            stop("No session file name detected")
+            stop("No session file name detected. Something's rotten in the state od Denmark.")
         }
     }
 
@@ -40,7 +40,7 @@ SaveMe <- function(session_file_name = NULL) {
         save.image(file = session_file_name)
         message("Session file '", session_file_name, "' saved successfully.")
     }, error = function(e) {
-        stop("Failed to save the session: ", e$message)
+        stop("Something's rotten in the state od Denmark.: ", e$message)
     })
 
 }

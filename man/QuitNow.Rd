@@ -8,7 +8,7 @@ QuitNow()
 }
 \description{
 This function terminates the current R session and exits with status 0, indicating successful completion.
-It is particularly useful for scripting and batch processing in environments like Slurm.
+It is particularly useful for scripting and batch processing when you want to run the script up to a point (practically equivalent to commenting the remained of the script). Remember to combine with a function SaveNow, as QuitNow does not save anything, just exits!
 }
 \examples{
 QuitNow()

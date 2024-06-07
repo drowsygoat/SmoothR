@@ -13,11 +13,11 @@
 #' @export
 #' @examples
 #' # Submit the currently running script to Slurm, outputting to the console
-#' RunSlurm()
+#' RunNow()
 #'
 #' # Submit the current script to Slurm, redirecting output to 'job_output.txt'
-#' RunSlurm("job_output.txt")
-RunSlurm <- function(output_file = NULL) {
+#' RunNow("job_output.txt")
+RunNow <- function(output_file = NULL) {
 
     args <- commandArgs(trailingOnly = FALSE)
     script_index <- grep("--file=", args, fixed = TRUE)

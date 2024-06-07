@@ -6,12 +6,12 @@
 #'
 #' @param dest_folder The directory to which the script will be copied and added to $PATH.
 #' @export
-ActivateRunSmoothR <- function(dest_folder) {
+ActivateSmoothR <- function(dest_folder) {
     # Copy the script to the desired folder
     CopyRunSmoothRScript(dest_folder)
 
     # Get the absolute path of the destination folder
-    full_path <- normalizePath(dest_folder, mustWork = FALSE)
+    full_path <- normalizePath(dest_folder, mustWork = TRUE)
 
     # Prepare the path addition command with the correct path
     path_addition <- sprintf("export PATH=\"$PATH:%s\"", full_path)
@@ -39,4 +39,21 @@ ActivateRunSmoothR <- function(dest_folder) {
     } else {
         stop("No shell configuration file (.bashrc, .bash_profile, or .zshrc) found.")
     }
+}
+#' Copy RunSmoothR.sh Script to a Specified Directory
+#'
+#' This function copies the 'RunSmoothR.sh' script from the 'shell_helpers' folder
+#' of the package to a specified folder.
+#'
+#' @param dest_folder The destination folder where the script will be copied.
+CopyRunSmoothRScript <- function(dest_folder) {
+  package_directory <- system.file("shell_helpers", package = "YourPackageName")
+  script_path <- file.path(package_directory, "RunSmoothR.sh")
+  
+  if (!file.exists(script_path)) {
+    stop("Script 'RunSmoothR.sh' does not exist in the package.")
+  }
+  
+  file.copy(script_path, file.path(dest_folder, "RunSmoothR.sh"))
+  cat("Script copied to:", dest_folder, "\n")
 }
