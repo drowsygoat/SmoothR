@@ -1,9 +1,9 @@
 #' Submit the Running R Script to Slurm for Execution
 #'
 #' This function submits the currently running R script to a Slurm-managed cluster.
-#' It uses a predefined Slurm script (`run_R_smootly.sh`) assumed to be available in the system's PATH.
+#' It uses a predefined Slurm script (`runSmoothR.sh`) assumed to be available in the system's PATH.
 #' The function automatically retrieves the name of the running script and submits it to Slurm,
-#' which makes the script handling secure and error-free. Also, a function (`activate()` will copy the file to your folder of choice (profided ar argument), and add the route to it to your $PATH variable by updatin "~/.bashrc", or ~/.zshrc
+#' which makes the script handling secure and error-free. Also, a function (`ActivateSmoothR())` will copy `runSmoothR.sh` to your folder of choice (profided ar argument), and add the route to it to your $PATH variable by updatin "~/.bashrc", or ~/.zshrc
 
 #'
 #' @param output_file Optional; specifies the file path where the Slurm job output should be redirected.
