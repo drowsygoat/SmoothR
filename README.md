@@ -1,12 +1,13 @@
-# SmmothR
+# SmoothR
 
 ## Slurm Environment Configurator
 
-This package provides a suite of tools designed to facilitate the configuration and management of computational environments, useful in systems using Slurm for job scheduling. The package allows users to interactively set up and modify environment variables, save configurations for later use, and integrate seamlessly with Slurm job submission processes.
+A suite of tools designed to facilitate the configuration and management of SLURM jobs from within R. The package allows users to interactively set up and modify environment variables, save R sessions and file for later use, and integrate seamlessly with Slurm job submission processes.
 
 ## Installation
 
 To install the latest version of RSessionHelper from GitHub, use the following commands in R:
+
 
 ```r
 # Install the devtools package if not already installed
@@ -14,8 +15,9 @@ if (!requireNamespace("devtools", quietly = TRUE)) {
   install.packages("devtools")
 }
 
+
 # Install RSessionHelper from GitHub
-devtools::install_github("username/YourPackageName")
+devtools::install_github("drowsygoat/SmoothR")
 ```
 ## Setup and Configuration
 
@@ -23,7 +25,7 @@ devtools::install_github("username/YourPackageName")
 
 #### Usage:
 
-To use `ActivateRunSmoothR run once:
+To use `ActivateRunSmoothR() run once:
 
 ```r
 ActivateRunSmoothR("~/your_preferred_directory")
