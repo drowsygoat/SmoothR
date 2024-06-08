@@ -250,9 +250,6 @@ AddFat <- function(fat_value = NULL) {
 #' The configuration file should contain lines formatted as `export KEY='VALUE'`.
 #' If the file does not exist or the key is not found, the function will stop with an error.
 #'
-#' @importFrom utils readLines
-#' @importFrom base which grepl stop sub strsplit
-#'
 #' @export
 ReadFromConfig <- function(key_to_check = NULL, config_file = file.path("~/.temp_shell_exports")) {
     # Check for the existence of the configuration file
@@ -261,7 +258,7 @@ ReadFromConfig <- function(key_to_check = NULL, config_file = file.path("~/.temp
     }
     
     # Read all lines from the configuration file
-    config_lines <- readLines(config_file)
+    config_lines <- base::readLines(config_file)
     # Initialize an empty list to store configuration values
     config_values <- list()
     

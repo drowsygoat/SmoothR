@@ -38,7 +38,7 @@ RunNow <- function(config_file = "~/.temp_shell_exports", output_file = NULL) {
     } else {
         stop("The script name could not be auto-detected. Ensure this is run from an R script.")
     }
-    slurm_script_name <- "run_loop.sh"
+    slurm_script_name <- "runSmootheR.sh"
     args <- c(script_name)
     if (!is.null(output_file)) {
         stdout <- output_file

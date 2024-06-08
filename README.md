@@ -29,7 +29,7 @@ set_config()  # Interactive environment setup
 `ActivateRunSmoothR()` prepares your system to use `runSmoothR.sh`:
 
 ```r
-ActivateRunSmoothR("~/your_preferred_directory")
+ActivateRunSmoothR("/path/to/file")
 ```
 
 - **Copies** `RunSmoothR.sh` to your specified directory.
