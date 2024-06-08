@@ -9,7 +9,6 @@
 ActivateSmoothR <- function(dest_folder) {
     # Copy the script to the desired folder
     CopyRunSmoothRScript(dest_folder)
-
     # Get the absolute path of the destination folder
     full_path <- normalizePath(dest_folder, mustWork = TRUE)
 

@@ -136,8 +136,8 @@ SetConfig <- function() {
     FAT <- "F"
 
     #' Construct the content to write to the config file
-    config_content <- sprintf("export NUM_THREADS='%s'\nexport JOB_TIME='%s'\nexport OUTPUT_DIR='%s'\nexport PARTITION='%s'\nexport SUFFIX='%s'",
-                              NUM_THREADS, JOB_TIME, OUTPUT_DIR, PARTITION, SUFFIX)
+    config_content <- sprintf("export NUM_THREADS='%s'\nexport JOB_TIME='%s'\nexport OUTPUT_DIR='%s'\nexport PARTITION='%s'\nexport SUFFIX='%s'%s'\nexport FAT='",
+                              NUM_THREADS, JOB_TIME, OUTPUT_DIR, PARTITION, SUFFIX, FAT)
 
     #' Write to the config file
     writeLines(config_content, config_path)
@@ -226,7 +226,68 @@ AddFat <- function(fat_value = NULL) {
         # If no value provided, just print the current configuration
         cat("Please select T or F. Current configuration:\n")
     }
-
+    
     cat(readLines(config_path), sep="\n")  # Display the updated or current configuration content
     invisible(NULL)
+}
+
+#' Read Configuration Values from a File
+#'
+#' This function reads key-value pairs from a specified configuration file that mimics shell export syntax.
+#' It allows the retrieval of a specific configuration value by its key.
+#'
+#' @param key_to_check The specific configuration key to retrieve.
+#'        This function will stop and throw an error if the key is not provided or not found.
+#' @param config_file The path to the configuration file.
+#'        Defaults to '~/.temp_shell_exports'.
+#'
+#' @return The value associated with the key_to_check from the configuration file.
+#'
+#' @examples
+#' ReadFromConfig(key_to_check = "NUM_THREADS")
+#'
+#' @details
+#' The configuration file should contain lines formatted as `export KEY='VALUE'`.
+#' If the file does not exist or the key is not found, the function will stop with an error.
+#'
+#' @importFrom utils readLines
+#' @importFrom base which grepl stop sub strsplit
+#'
+#' @export
+ReadFromConfig <- function(key_to_check = NULL, config_file = file.path("~/.temp_shell_exports")) {
+    # Check for the existence of the configuration file
+    if (!file.exists(config_file)) {
+        stop("Config file does not exist. Please run SetConfig() first.")
+    }
+    
+    # Read all lines from the configuration file
+    config_lines <- readLines(config_file)
+    # Initialize an empty list to store configuration values
+    config_values <- list()
+    
+    # Find lines that match the export pattern and extract their indices
+    matches <- which(grepl("^export\\s+\\w+='[^']*'$", config_lines))
+    
+    # Loop through matched lines to parse and store key-value pairs
+    for (index in matches) {
+        line <- config_lines[index]
+        key_value <- sub("^export\\s+(\\w+)='([^']*)'$", "\\1 \\2", line)
+        parts <- strsplit(key_value, " ")[[1]]
+        config_values[[parts[1]]] <- parts[2]
+    }
+    
+    # Check if a key was provided and stop if not
+    if (is.null(key_to_check)) {
+        stop("Please provide a Key")
+    }
+    
+    # Check if the requested key exists in the configurations
+    has_key <- key_to_check %in% names(config_values)
+    
+    # Return the value for the requested key or stop if it is not found
+    if (has_key) {
+        return(config_values[[key_to_check]])
+    } else {
+        stop("Incorrect Key")
+    }
 }

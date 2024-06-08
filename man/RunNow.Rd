@@ -2,28 +2,26 @@
 % Please edit documentation in R/RunNow.R
 \name{RunNow}
 \alias{RunNow}
-\title{Submit the Running R Script to Slurm for Execution}
+\title{RunNow Function}
 \usage{
-RunNow(output_file = NULL)
+RunNow(config_file = "~/.temp_shell_exports", output_file = NULL)
 }
 \arguments{
-\item{output_file}{Optional; specifies the file path where the Slurm job output should be redirected.
-If not specified, the output will be displayed in the console.}
+\item{config_file}{A string specifying the path to the configuration file that sets required
+environment variables. Defaults to "~/.temp_shell_exports".}
+
+\item{output_file}{A string specifying the path to the file where stdout and stderr from the Slurm
+job will be directed. If NULL, outputs will not be redirected. Defaults to NULL.}
 }
 \value{
-The function does not return a value but prints the submission status to the console.
-        It is designed for interactive use to allow dynamic job control.
+The value of the `OUTPUT_DIR` environment variable, indicating the output directory.
 }
 \description{
-This function submits the currently running R script to a Slurm-managed cluster.
-It uses a predefined Slurm script (`runSmoothR.sh`) assumed to be available in the system's PATH.
-The function automatically retrieves the name of the running script and submits it to Slurm,
-which makes the script handling secure and error-free. Also, a function (`ActivateSmoothR())` will copy `runSmoothR.sh` to your folder of choice (profided ar argument), and add the route to it to your $PATH variable by updatin "~/.bashrc", or ~/.zshrc
+This function is designed to submit R scripts to a Slurm job scheduler. It reads configuration from
+a specified shell script in the user's home directory to set environment variables in R, retrieves 
+the `OUTPUT_DIR` environment variable, and submits the job using a specified Slurm script.
 }
 \examples{
-# Submit the currently running script to Slurm, outputting to the console
-RunNow()
-
-# Submit the current script to Slurm, redirecting output to 'job_output.txt'
-RunNow("job_output.txt")
+RunNow()  # Uses default configuration file and no output redirection
+RunNow(output_file = "path/to/output.log")
 }
