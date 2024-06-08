@@ -6,15 +6,13 @@
 #'
 #' @export
 InitSmoothR <- function() {
-
     if ( ! interactive() ) {
         return(invisible(NULL))
     }
-
     output_dir <- SetConfig()
-
+    dir.create(output_dir)
+    checkDir(output_dir)
     CopyRunSmoothRScript(output_dir)
-    
 }
 
 #' Copy runSmoothR.sh Script to a Specified Directory
