@@ -15,7 +15,23 @@ SaveNow <- function(session_file_name = NULL) {
     requireNamespace("sessioninfo", quietly = TRUE)
 
     if (interactive()) {
-        stop("This function is not available in interactive mode.")
+
+        output_dir <- ReadFromConfig("OUTPUT_DIR")
+
+        relative_path <- file.path(".", output_dir)
+    
+        if (!dir.exists(relative_path)) {
+            message(paste("Directory '", normalizePath(relative_path), "' created."))
+        } else {
+            message(paste("Directory '", normalizePath(relative_path), "' already exists."))
+        }
+        
+        full_path <- file.path(relative_path, paste0(output_dir, ".RData"))
+        
+        save.image(file = full_path)
+        
+        return(paste("Session file '", normalizePath(full_path), "' saved successfully."))
+
     }
 
     if (is.null(session_file_name)) {
@@ -27,20 +43,15 @@ SaveNow <- function(session_file_name = NULL) {
         }
     }
 
-    tryCatch({
-        sink("R_console_output")
-        timespam
+    SafeExecute({
+        sink(file.path("R_console_output, paste0(session_info_", timestamp, ".txt"))
         print(sessioninfo::session_info())
         sink()
-    }, error = function(e) {
-        cat("Failed to save session info: ", e$message, "\n")
     })
 
-    tryCatch({
+    SafeExecute({
         save.image(file = session_file_name)
         message("Session file '", session_file_name, "' saved successfully.")
-    }, error = function(e) {
-        stop("Something's rotten in the state od Denmark.: ", e$message)
     })
 
 }

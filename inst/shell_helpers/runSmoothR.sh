@@ -143,13 +143,13 @@ SBATCH_SCRIPT="${OUTPUT_DIR}/slurm_reports/slurm_submission_${TIMESTAMP}.sh"
 
 cat <<EOF > "$SBATCH_SCRIPT"
 #!/bin/bash -eu
-#SBATCH -A $COMPUTE_ACCOUNT
+#SBATCH -A ${COMPUTE_ACCOUNT_LECH}
 #SBATCH -J ${OUTPUT_DIR}
 #SBATCH -o ${OUTPUT_DIR}/slurm_reports/%x_%j_${TIMESTAMP}.out
 #SBATCH -t $JOB_TIME # job time
 #SBATCH -e ${OUTPUT_DIR}/slurm_reports/%x_%j_${TIMESTAMP}.err
-#SBATCH -p $PARTITION
-#SBATCH -n $NUM_THREADS
+#SBATCH -p ${PARTITION}
+#SBATCH -n ${NUM_THREADS}
 #SBATCH --mail-user=example@email.com
 #SBATCH --mail-type=ALL
 

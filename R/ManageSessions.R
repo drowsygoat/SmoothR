@@ -17,7 +17,7 @@ InitNow <- function(session_file_name = NULL) {
     if (is.null(session_file_name)) {
         args <- commandArgs(trailingOnly = TRUE)
         if (length(args) > 0) {
-            session_file_name <- paste(args[1], ".RData")
+            session_file_name <- paste0(args[1], ".RData")
             output_dir <- args[1]  # Assuming the first argument is also the output directory
         } else {
             stop("Something is messed up, there were not args detected.")
