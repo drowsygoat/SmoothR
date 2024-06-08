@@ -21,6 +21,7 @@ SaveNow <- function(session_file_name = NULL) {
         relative_path <- file.path(".", output_dir)
     
         if (!dir.exists(relative_path)) {
+            dir.create(relative_path)
             message(paste("Directory '", normalizePath(relative_path), "' created."))
         } else {
             message(paste("Directory '", normalizePath(relative_path), "' already exists."))

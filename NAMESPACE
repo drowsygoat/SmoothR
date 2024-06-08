@@ -3,6 +3,7 @@
 export(ActivateSmoothR)
 export(AddFat)
 export(InitNow)
+export(InitSmoothR)
 export(QuitNow)
 export(ReadFromConfig)
 export(RunNow)

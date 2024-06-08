@@ -14,8 +14,6 @@ Prints a formatted checkpoint message to the console; returns invisible NULL.
 }
 \description{
 This function outputs a formatted checkpoint message that includes a user-defined comment.
-It is designed to assist in logging and monitoring script progress, especially when run
-as part of automated processes where specific checkpoints need to be recorded and tracked.
 }
 \examples{
 checkpoint("Data loaded successfully")

@@ -13,7 +13,20 @@
 #' RunNow()  # Uses default configuration file and no output redirection
 #' RunNow(output_file = "path/to/output.log")
 #' @export
-RunNow <- function(config_file = "~/.temp_shell_exports", output_file = NULL) {
+RunNow <- function() {
+
+   if (! interactive()) {
+       return(invisible(NULL))
+    }
+
+    checkDir(output_dir)
+    
+    config_path <- file.path(home_dir, ".temp_shell_exports")
+
+    if (!file.exists(config_path)) {
+        stop("Config file does not exist. Please run SetConfig() first.")
+    }
+
     # Expand the path to the configuration file to get the absolute path
     config_file <- path.expand(config_file)
 
@@ -38,7 +51,10 @@ RunNow <- function(config_file = "~/.temp_shell_exports", output_file = NULL) {
     } else {
         stop("The script name could not be auto-detected. Ensure this is run from an R script.")
     }
+
     slurm_script_name <- "runSmootheR.sh"
+    script_path <- system.file("scripts", "runScript.sh", package = "YourPackageName")
+    
     args <- c(script_name)
     if (!is.null(output_file)) {
         stdout <- output_file

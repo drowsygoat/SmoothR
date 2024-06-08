@@ -103,12 +103,11 @@ ConvertTimestamp <- function(timestamp) {
 #' set_config_interactively() Run this in an interactive R session
 
 SetConfig <- function() {
+    
     if (!interactive()) {
         cat("This function can only be run in an interactive R session.\n")
         return(invisible(NULL))
     }
-    home_dir <- Sys.getenv("HOME")
-    config_path <- file.path(home_dir, ".temp_shell_exports")
 
     #' Prompt user for input and provide default values
     NUM_THREADS <- readline(prompt = "Enter the number of threads (default 1): ")
@@ -139,11 +138,17 @@ SetConfig <- function() {
     config_content <- sprintf("export NUM_THREADS='%s'\nexport JOB_TIME='%s'\nexport OUTPUT_DIR='%s'\nexport PARTITION='%s'\nexport SUFFIX='%s'\nexport FAT='%s'",
                               NUM_THREADS, JOB_TIME, OUTPUT_DIR, PARTITION, SUFFIX, FAT)
 
+    output_dir <- OUTPUT_DIR
+
+    config_path <- file.path(output_dir, paste0(".temp_shell_exports_", output_dir))
+
     #' Write to the config file
     writeLines(config_content, config_path)
     cat("Config file created/updated at:", config_path, "\n")
     cat("Config file content:\n")
     cat(readLines(config_path), sep = "\n")
+    
+    return(output_dir) # required by InitSmooth
 }
 
 #' Update Configuration Setting
@@ -159,7 +164,29 @@ SetConfig <- function() {
 #' UpdateConfig("NUM_THREADS", "8") # This example updates the number of threads.
 
 UpdateConfig <- function(key, value) {
-    home_dir <- Sys.getenv("HOME")
+
+
+    if (!interactive()) {
+        cat("This function can only be run in an interactive R session.\n")
+        return(invisible(NULL))
+    }
+
+    checkDir()
+    
+    output_dir <- ReadFromConfig("OUTPUT_DIR")
+    
+    if (output_dir != basename(getwd())){
+        stop("Something's rotten in the State of Denmark")
+    }
+
+    config_path <- paste0(".temp_shell_exports", output_dir)
+    
+    # Check if the configuration file exists
+    if (!file.exists(config_path)) {
+        stop("Config file does not exist. Please run SetConfig() or InitSmothR() first.")
+    }
+
+    checkDir(output_dir)
     config_path <- file.path(home_dir, ".temp_shell_exports")
 
     if (!file.exists(config_path)) {
@@ -190,12 +217,25 @@ UpdateConfig <- function(key, value) {
 #' @param fat_value Optional value for the FAT setting; default NULL means no update.
 #' @export
 AddFat <- function(fat_value = NULL) {
-    home_dir <- Sys.getenv("HOME")
-    config_path <- file.path(home_dir, ".temp_shell_exports")
+
+    if (!interactive()) {
+        cat("This function can only be run in an interactive R session.\n")
+        return(invisible(NULL))
+    }
+    
+    checkDir()
+    
+    output_dir <- ReadFromConfig("OUTPUT_DIR")
+    
+    if (output_dir != basename(getwd())){
+        stop("Something's rotten in the State of Denmark")
+    }
+
+    config_path <- paste0(".temp_shell_exports", output_dir)
 
     # Check if the configuration file exists
     if (!file.exists(config_path)) {
-        stop("Config file does not exist. Please run SetConfig() or a similar function first.")
+        stop("Config file does not exist. Please run SetConfig() or InitSmothR() first.")
     }
 
     # Read the existing configuration
@@ -251,12 +291,25 @@ AddFat <- function(fat_value = NULL) {
 #' If the file does not exist or the key is not found, the function will stop with an error.
 #'
 #' @export
-ReadFromConfig <- function(key_to_check = NULL, config_file = file.path("~/.temp_shell_exports")) {
+ReadFromConfig <- function(key_to_check = NULL) {
+
+    if ( ! interactive() ) {
+        return(invisible(NULL))
+    }
+    
+    checkDir()
+
+    config_file = list.files(pattern = "temp_shell_exports")
+
     # Check for the existence of the configuration file
     if (!file.exists(config_file)) {
         stop("Config file does not exist. Please run SetConfig() first.")
     }
     
+    if (length(config_file) > 1) {
+        stop("Multiple config files found.")
+    }
+
     # Read all lines from the configuration file
     config_lines <- base::readLines(config_file)
     # Initialize an empty list to store configuration values
@@ -287,4 +340,32 @@ ReadFromConfig <- function(key_to_check = NULL, config_file = file.path("~/.temp
     } else {
         stop("Incorrect Key")
     }
+}
+
+
+#' Change Working Directory or Verify Current Directory
+#'
+#' This function checks if the specified `output_dir` exists as a directory path.
+#' If it exists, the function changes the current working directory to `output_dir`.
+#' If it does not exist, the function checks if the current directory's name matches `output_dir`.
+#' If the current directory matches, it confirms the location; otherwise, it throws an error.
+#' 
+checkDir <- function(output_dir) {
+    # Check if output_dir exists as a directory path
+    if (dir.exists(output_dir)) {
+        # Change the working directory to output_dir
+        setwd(output_dir)
+        cat("Changed working directory to:", output_dir, "\n")
+    } else {
+        # Get the name of the current working directory
+        current_dir <- basename(getwd())
+        # Check if the current directory name matches output_dir
+        if (current_dir == output_dir) {
+            cat("Already in the working directory:", output_dir, "\n")
+        } else {
+            # Provide a clearer error message
+            stop("Directory '", output_dir, "' does not exist or is not the current directory. Please navigate to the correct directory.")
+        }
+    }
+    invisible(NULL)
 }

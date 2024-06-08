@@ -21,16 +21,25 @@
 # Create timestamp
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
-config_file="$HOME/.temp_shell_exports"
+# look for config
+
+found_files=$(find . -type f | grep "temp_shell_exports")
+
+# Convert found files into an array
+IFS=$'\n' read -r -a files_array <<< "$found_files"
+
+# Check for uniqueness
+if [ "${#files_array[@]}" -eq 1 ]; then
+    echo "Unique file found"
+    config_file="${files_array[0]}"
+    echo "Processing file: $config_file"
+    # Additional commands to process the file can go here
+else
+    echo "Error: No config found or multiple config files found in the directory"
+    exit 1
+fi
 
 source $config_file
-
-# Set default parameters if unset
-NUM_THREADS="${NUM_THREADS:-1}"
-JOB_TIME="${JOB_TIME:-"0:05:00"}"
-OUTPUT_DIR="${OUTPUT_DIR:-"./output_dir"}"
-PARTITION="${PARTITION:-"devel"}"
-SUFFIX="${SUFFIX:-"$(date +%Y%m%d_%H%M%S)"}"
 
 # Function to display help if no arguments are provided
 function display_help() {
@@ -98,8 +107,8 @@ check_file() {
             if [[ $current_count -gt $phrase_found_count ]]; then
             phrase_found_count=$current_count
             last_keyword_found=$(grep -o "$KEYWORD" "$OUTPUT_FILE" | tail -1)
-            echo "$last_keyword_found"
             tput setaf 3 # yellow ;)
+            echo ""
             echo "$(echo $last_keyword_found | sed 's/CHECKPOINT_//g')"
             tput sgr 0
             echo -n "Monitoring job status for Job ID: $current_status" # single instance below dots    
@@ -143,14 +152,33 @@ SBATCH_SCRIPT="${OUTPUT_DIR}/slurm_reports/slurm_submission_${TIMESTAMP}.sh"
 
 cat <<EOF > "$SBATCH_SCRIPT"
 #!/bin/bash -eu
-#SBATCH -A ${COMPUTE_ACCOUNT_LECH}
+#SBATCH -A $COMPUTE_ACCOUNT_LECH
 #SBATCH -J ${OUTPUT_DIR}
 #SBATCH -o ${OUTPUT_DIR}/slurm_reports/%x_%j_${TIMESTAMP}.out
 #SBATCH -t $JOB_TIME # job time
 #SBATCH -e ${OUTPUT_DIR}/slurm_reports/%x_%j_${TIMESTAMP}.err
-#SBATCH -p ${PARTITION}
-#SBATCH -n ${NUM_THREADS}
-#SBATCH --mail-user=example@email.com
+#SBATCH -p $PARTITION
+#SBATCH -n $NUM_THREADS
+#SBATCH --mail-user=lecka@liu.se
+#SBATCH --mail-type=ALL
+
+module load R/4.1.1
+module load R_packages/4.1.1
+
+./\$R_SCRIPT \$OUTPUT_DIR \$R_SCRIPT \$SUFFIX \$TIMESTAMP \$NUM_THREADS \$ARGUMENTS 2>&1 | tee \$OUTPUT_DIR/R_console_output/R_output_\$TIMESTAMP.log >> \$OUTPUT_DIR/R_output_cumulative.log
+EOF
+
+cat <<EOF > "$FAT_SCRIPT"
+#!/bin/bash -eu
+#SBATCH -A $COMPUTE_ACCOUNT_LECH
+#SBATCH -J ${OUTPUT_DIR}
+#SBATCH -o ${OUTPUT_DIR}/slurm_reports/%x_%j_${TIMESTAMP}.out
+#SBATCH -t $JOB_TIME # job time
+#SBATCH -e ${OUTPUT_DIR}/slurm_reports/%x_%j_${TIMESTAMP}.err
+#SBATCH -p $PARTITION
+#SBATCH -n $NUM_THREADS
+#SBATCH -C fat
+#SBATCH --mail-user=lecka@liu.se
 #SBATCH --mail-type=ALL
 
 module load R/4.1.1

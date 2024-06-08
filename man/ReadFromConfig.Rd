@@ -4,10 +4,7 @@
 \alias{ReadFromConfig}
 \title{Read Configuration Values from a File}
 \usage{
-ReadFromConfig(
-  key_to_check = NULL,
-  config_file = file.path("~/.temp_shell_exports")
-)
+ReadFromConfig(key_to_check = NULL)
 }
 \arguments{
 \item{key_to_check}{The specific configuration key to retrieve.

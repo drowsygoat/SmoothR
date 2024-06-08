@@ -4,7 +4,7 @@
 \alias{RunNow}
 \title{RunNow Function}
 \usage{
-RunNow(config_file = "~/.temp_shell_exports", output_file = NULL)
+RunNow()
 }
 \arguments{
 \item{config_file}{A string specifying the path to the configuration file that sets required
