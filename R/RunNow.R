@@ -33,7 +33,7 @@ RunNow <- function(config_file = "~/.temp_shell_exports", output_file = NULL) {
     # Retrieve script name from command line arguments
     args <- commandArgs(trailingOnly = FALSE)
     script_index <- grep("--file=", args, fixed = TRUE)
-    if (length(script_index) > 0) {
+    if (length(script_index) > 0) {cd
         script_name <- sub("--file=", "", args[script_index])
     } else {
         stop("The script name could not be auto-detected. Ensure this is run from an R script.")

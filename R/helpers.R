@@ -136,7 +136,7 @@ SetConfig <- function() {
     FAT <- "F"
 
     #' Construct the content to write to the config file
-    config_content <- sprintf("export NUM_THREADS='%s'\nexport JOB_TIME='%s'\nexport OUTPUT_DIR='%s'\nexport PARTITION='%s'\nexport SUFFIX='%s'%s'\nexport FAT='",
+    config_content <- sprintf("export NUM_THREADS='%s'\nexport JOB_TIME='%s'\nexport OUTPUT_DIR='%s'\nexport PARTITION='%s'\nexport SUFFIX='%s'\nexport FAT='%s'",
                               NUM_THREADS, JOB_TIME, OUTPUT_DIR, PARTITION, SUFFIX, FAT)
 
     #' Write to the config file
@@ -167,13 +167,13 @@ UpdateConfig <- function(key, value) {
     }
 
     config <- readLines(config_path)
-    key_pattern <- sprintf("^%s=", key)
+    key_pattern <- sprintf("^export %s=", key)
     has_key <- grepl(key_pattern, config)
 
     if (any(has_key)) {
-        config[has_key] <- sprintf('%s="%s"', key, value)
+        config[has_key] <- sprintf('export %s="%s"', key, value)
     } else {
-        config <- c(config, sprintf('%s="%s"', key, value))
+        config <- c(config, sprintf('export %s="%s"', key, value))
     }
 
     writeLines(config, config_path)
