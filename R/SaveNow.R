@@ -34,7 +34,7 @@ SaveNow <- function(session_file_name = NULL, timestamp = format(Sys.time(), "%Y
     args <- commandArgs(trailingOnly = TRUE)
     if (is.null(session_file_name)) {
         if (length(args) > 0) {
-            session_file_name <- paste0(args[1], "Data")
+            session_file_name <- file.path(output_dir, paste0(args[1], "Data"))
         } else {
             stop("No session file name detected. Please provide a filename.")
         }
@@ -47,7 +47,7 @@ SaveNow <- function(session_file_name = NULL, timestamp = format(Sys.time(), "%Y
     suppressWarnings(try(rm(list = c("args"), envir = .GlobalEnv), silent = TRUE))
     
     SafeExecute({
-        session_info_path <- file.path("R_console_output", paste0("session_info_", timestamp, ".txt"))
+        session_info_path <- file.path(output_dir, "R_console_output", paste0("session_info_", timestamp, ".txt"))
         sink(session_info_path)
         print(sessioninfo::session_info())
         sink()

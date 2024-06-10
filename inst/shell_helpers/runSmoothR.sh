@@ -27,7 +27,7 @@ IFS=$'\n' read -r -a files_array <<< "$found_files"
 # Ensuring a unique configuration file is found
 if [ "${#files_array[@]}" -eq 1 ]; then
     echo "Unique configuration file found."
-    config_file="${files_array[0]}"
+    config_file="${files_array[0]}" 
     echo "Using configuration from: $config_file"
 else
     echo "Error: No configuration file found or multiple configurations present."
@@ -42,7 +42,9 @@ JOB_TIME="${JOB_TIME:-"00:05:00"}"
 OUTPUT_DIR="${OUTPUT_DIR:-"./output_dir"}"
 PARTITION="${PARTITION:-"devel"}"
 SUFFIX="${SUFFIX:-"$(date +%Y%m%d_%H%M%S)"}"
+FAT=${FAT}
 USER_E_MAIL="${USER_E_MAIL:-user_did_not_provide_email@example.com}"
+COMPUTE_ACCOUNT=$COMPUTE_ACCOUNT
 
 # Function to display script usage
 function display_help() {
@@ -148,42 +150,52 @@ mkdir -p "${OUTPUT_DIR}/R_console_output"
 
 SBATCH_SCRIPT="${OUTPUT_DIR}/slurm_reports/slurm_submission_${TIMESTAMP}.sh"
 
-cat <<EOF > "$SBATCH_SCRIPT"
+if [[ $FAT == "F" ]]; then
+
+    cat <<EOF > "$SBATCH_SCRIPT"
 #!/bin/bash -eu
-#SBATCH -A $COMPUTE_ACCOUNT_LECH
+#SBATCH -A ${COMPUTE_ACCOUNT}
 #SBATCH -J ${OUTPUT_DIR}
 #SBATCH -o ${OUTPUT_DIR}/slurm_reports/%x_%j_${TIMESTAMP}.out
 #SBATCH -t $JOB_TIME # job time
 #SBATCH -e ${OUTPUT_DIR}/slurm_reports/%x_%j_${TIMESTAMP}.err
-#SBATCH -p $PARTITION
-#SBATCH -n $NUM_THREADS
-#SBATCH --mail-user=$USER_E_MAIL
+#SBATCH -p ${PARTITION}
+#SBATCH -n ${NUM_THREADS}
+#SBATCH --mail-user=${USER_E_MAIL}
 #SBATCH --mail-type=ALL
 
+module load bioinfo-tools
+module load MACS
 module load R/4.1.1
 module load R_packages/4.1.1
 
-./\$R_SCRIPT \$OUTPUT_DIR \$R_SCRIPT \$SUFFIX \$TIMESTAMP \$NUM_THREADS \$ARGUMENTS 2>&1 | tee \$OUTPUT_DIR/R_console_output/R_output_\$TIMESTAMP.log >> \$OUTPUT_DIR/R_output_cumulative.log
+\$R_SCRIPT \$OUTPUT_DIR \$R_SCRIPT \$SUFFIX \$TIMESTAMP \$NUM_THREADS \$ARGUMENTS 2>&1 | tee \$OUTPUT_DIR/R_console_output/R_output_\$TIMESTAMP.log >> \$OUTPUT_DIR/R_output_cumulative.log
 EOF
 
-# cat <<EOF > "$FAT_SCRIPT"
-# #!/bin/bash -eu
-# #SBATCH -A $COMPUTE_ACCOUNT_LECH
-# #SBATCH -J ${OUTPUT_DIR}
-# #SBATCH -o ${OUTPUT_DIR}/slurm_reports/%x_%j_${TIMESTAMP}.out
-# #SBATCH -t $JOB_TIME # job time
-# #SBATCH -e ${OUTPUT_DIR}/slurm_reports/%x_%j_${TIMESTAMP}.err
-# #SBATCH -p $PARTITION
-# #SBATCH -n $NUM_THREADS
-# #SBATCH -C fat
-# #SBATCH --mail-user=lecka@liu.se
-# #SBATCH --mail-type=ALL
+else
 
-# module load R/4.1.1
-# module load R_packages/4.1.1
+    cat <<EOF > "$SBATCH_SCRIPT"
+#!/bin/bash -eu
+#SBATCH -A ${COMPUTE_ACCOUNT}
+#SBATCH -J ${OUTPUT_DIR}
+#SBATCH -o ${OUTPUT_DIR}/slurm_reports/%x_%j_${TIMESTAMP}.out
+#SBATCH -t $JOB_TIME # job time
+#SBATCH -e ${OUTPUT_DIR}/slurm_reports/%x_%j_${TIMESTAMP}.err
+#SBATCH -p ${PARTITION}
+#SBATCH -n ${NUM_THREADS}
+#SBATCH -C fat
+#SBATCH --mail-user=${USER_E_MAIL}
+#SBATCH --mail-type=ALL
 
-# ./\$R_SCRIPT \$OUTPUT_DIR \$R_SCRIPT \$SUFFIX \$TIMESTAMP \$NUM_THREADS \$ARGUMENTS 2>&1 | tee \$OUTPUT_DIR/R_console_output/R_output_\$TIMESTAMP.log >> \$OUTPUT_DIR/R_output_cumulative.log
-# EOF
+module load bioinfo-tools
+module load MACS
+module load R/4.1.1
+module load R_packages/4.1.1
+
+\$R_SCRIPT \$OUTPUT_DIR \$R_SCRIPT \$SUFFIX \$TIMESTAMP \$NUM_THREADS \$ARGUMENTS 2>&1 | tee \$OUTPUT_DIR/R_console_output/R_output_\$TIMESTAMP.log >> \$OUTPUT_DIR/R_output_cumulative.log
+EOF
+
+fi
 
 echo -n "Job will start in "
 
@@ -267,8 +279,12 @@ echo "Runtime was $runtimeh hours ($runtimem minutes)."
 # Output result handling
 
 if [[ $? -eq 0 ]]; then
-    echo -e "Job ended. Here's the R console output:\n"
-    cat "${OUTPUT_DIR}/R_console_output/R_output_${TIMESTAMP}.log" | more
+    echo -e "Job ended. Do you want to see it now?\n"
+    read answer  # Capture user input
+    answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+    if [[ "$answer" == "y" ]]; then
+        cat "${OUTPUT_DIR}/R_console_output/R_output_${TIMESTAMP}.log" | more
+    fi
 else
     echo "SLURM job failed. Check the error file for details."
     cat $(find ${OUTPUT_DIR}/slurm_reports -maxdepth 1 -type f -printf '%T@ %p\n' | sort -k1,1nr | head -n1 | cut -d' ' -f2-) | more

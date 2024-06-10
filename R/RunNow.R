@@ -54,7 +54,7 @@ RunNow <- function(script_name = NULL, verbose = TRUE) {
     }
 
     cat("Submitting '", slurm_script_name, "' to Slurm with output directory '", output_dir, "'...\n", sep = "")
-    system2(slurm_script_name, args = paste0("../", shell_args), stdout = stdout, stderr = stderr)
+    system2(slurm_script_name, args = paste0(shell_args), stdout = stdout, stderr = stderr)
     
     # Return the output directory for further use
     # assign("output_dir", normalizePath(output_dir), envir = .GlobalEnv)
