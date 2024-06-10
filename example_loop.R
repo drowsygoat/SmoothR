@@ -49,7 +49,7 @@ is_prime <- function(num) {
 
 find_primes <- function(limit) {
   primes <- c()
-  for (num in 2:Inf) {
+  for (num in 2:limit) {
     if (length(primes) >= limit) break
     if (is_prime(num)) primes <- c(primes, num)
   }
@@ -57,30 +57,16 @@ find_primes <- function(limit) {
 }
 
 prime_numbers <- find_primes(200)
-cat("First 200 prime numbers calculated.\n")
+checkpoint("First 20 prime numbers calculated.")
 
 # Error handling with SafeExecute
-SafeExecute({
-  # Simulated erroneous function call
-  if (exists("I_have_no_mouth_and_I_must_scream")) {
-    I_have_no_mouth_and_I_must_scream()
-  } else {
-    warning("Function I_have_no_mouth_and_I_must_scream does not exist.")
-  }
-})
+SafeExecute({ I_have_no_mouth_and_I_must_scream })
 
-# Data visualization
-pdf(file.path(output_dir, "plot2.pdf"))
-ggplot(mpg, aes(displ, hwy, colour = class)) + geom_point()
-dev.off()
-
-# Reporting results
-cat(sprintf("Final report generated at %s.\n", Sys.time()))
-
+Sys.sleep(30)
 # Save session and cleanup
 ################################################################################
 SaveNow()
-
+Sys.sleep(30)
 # Properly exit script
 ################################################################################
 quit(status = 0)
