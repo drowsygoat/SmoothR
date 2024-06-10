@@ -26,13 +26,13 @@ set_config()  # Interactive environment setup
 
 ### Script Activation
 
-`ActivateRunSmoothR()` prepares your system to use `runSmoothR.sh`:
+`InitSmoothR()` prepares your system to use `runSmoothR.sh`:
 
 ```r
-ActivateRunSmoothR("/path/to/file")
+InitSmoothR("/path/to/file")
 ```
 
-- **Copies** `RunSmoothR.sh` to your specified directory.
+- **Copies** `runSmoothR.sh` to your output directory.
 - **Updates** `$PATH` to include the script's directory.
 - **Configures** the shell by updating `.bashrc`, `.bash_profile`, or `.zshrc`.
 
