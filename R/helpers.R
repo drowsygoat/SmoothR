@@ -266,14 +266,14 @@ setEmail <- function(email) {
     message("The USER_E_MAIL has been set to: ", Sys.getenv("USER_E_MAIL"))
 }
 
-#' Set USER_ACCOUNT Environment Variable
+#' Set COMPUTE_ACCOUNT Environment Variable
 #'
-#' Sets the USER_ACCOUNT environment variable to the specified account name and displays it.
-#' @param accountName Account name to set as USER_ACCOUNT.
+#' Sets the COMPUTE_ACCOUNT environment variable to the specified account name and displays it.
+#' @param accountName Account name to set as COMPUTE_ACCOUNT.
 #' @examples
 #' setAccount("snic123456")
 #' @export
 setAccount <- function(accountName) {
-    Sys.setenv(USER_ACCOUNT = accountName)
-    message("The USER_ACCOUNT has been set to: ", Sys.getenv("USER_ACCOUNT"))
+    Sys.setenv(COMPUTE_ACCOUNT = accountName)
+    message("The COMPUTE_ACCOUNT has been set to: ", Sys.getenv("COMPUTE_ACCOUNT"))
 }

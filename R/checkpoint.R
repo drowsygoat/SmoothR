@@ -8,8 +8,8 @@
 #' checkpoint("Data loaded successfully")
 #' checkpoint("Model training started")
 checkpoint <- function(comment) {
-    if (interactive()) {
-        return(invisible(NULL))
-    }
+    # if (interactive()) {
+    #     return(invisible(NULL))
+    # }
     cat(sprintf("CHECKPOINT_%s\n", comment)) # Ensures visibility in logs
 }

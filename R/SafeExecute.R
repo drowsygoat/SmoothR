@@ -16,6 +16,12 @@
 #'   if (mean(x) > 0) "Positive" else "Negative"
 #' }, logging = TRUE, log_file = "run_log.txt")
 SafeExecute <- function(expr, logging = FALSE, log_file = "R_console_log_file.log", envir = parent.frame()) {
+
+    if (interactive()) {
+        result <- eval(expr, envir)
+        return(result)
+    }
+
     handle_error <- function(e) {
         checkpoint(paste("Error occurred:", conditionMessage(e)))
         invisible(NULL)  # Allow continuation without returning an error
@@ -32,5 +38,7 @@ SafeExecute <- function(expr, logging = FALSE, log_file = "R_console_log_file.lo
     }
 
     result <- tryCatch(eval(expr, envir = envir), error = handle_error, warning = handle_warning)
+
     return(result)
+
 }

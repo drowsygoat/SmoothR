@@ -2,15 +2,15 @@
 % Please edit documentation in R/helpers.R
 \name{setAccount}
 \alias{setAccount}
-\title{Set USER_ACCOUNT Environment Variable}
+\title{Set COMPUTE_ACCOUNT Environment Variable}
 \usage{
 setAccount(accountName)
 }
 \arguments{
-\item{accountName}{Account name to set as USER_ACCOUNT.}
+\item{accountName}{Account name to set as COMPUTE_ACCOUNT.}
 }
 \description{
-Sets the USER_ACCOUNT environment variable to the specified account name and displays it.
+Sets the COMPUTE_ACCOUNT environment variable to the specified account name and displays it.
 }
 \examples{
 setAccount("snic123456")

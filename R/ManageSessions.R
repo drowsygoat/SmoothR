@@ -17,7 +17,7 @@ InitNow <- function(session_file_name = NULL) {
     if (is.null(session_file_name)) {
         args <- commandArgs(trailingOnly = TRUE)
         if (length(args) > 0) {
-            session_file_name <- paste0(args[1], ".RData")
+            session_file_name <- file.path(output_dir, paste0(args[1], ".RData"))
             output_dir <- args[1]  # Assuming the first argument is also the output directory
         } else {
             stop("No command line arguments detected.")
@@ -29,16 +29,20 @@ InitNow <- function(session_file_name = NULL) {
         stop("Output directory does not exist.")
     }
 
-    checkDir()
+    # checkDir()
 
     # Load the session file if it exists
     if (file.exists(session_file_name)) {
-        load(session_file_name)
+
+        load(session_file_name, envir = .GlobalEnv)
         message("Session file '", session_file_name, "' loaded successfully.")
         checkpoint(paste("Session file '", session_file_name, "' loaded successfully."))
+
     } else {
+
         message("Session file '", session_file_name, "' does not exist. Continuing without it.")
         checkpoint(paste("Session file '", session_file_name, "' does not exist. Continuing without it."))
+        
     }
 }
 
