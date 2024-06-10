@@ -4,7 +4,7 @@
 \alias{InitSmoothR}
 \title{Activate runSmoothR.sh by Copying and Adding to $PATH}
 \usage{
-InitSmoothR()
+InitSmoothR(force = F)
 }
 \description{
 This function copies 'runSmoothR.sh' to a specified directory and adds the directory

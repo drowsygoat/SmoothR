@@ -5,21 +5,22 @@
 #' only if the path is not already present.
 #'
 #' @export
-InitSmoothR <- function() {
+InitSmoothR <- function(force = F) {
+    current_dir <- getwd()
     if ( ! interactive() ) {
         return(invisible(NULL))
     }
-    output_dir <- SetConfig()
-    dir.create(output_dir)
-    checkDir(output_dir)
+    output_dir <- SetConfig(force = force)
+    output_dir <<- normalizePath(output_dir)
+    # checkDir(output_dir)
     CopyRunSmoothRScript(output_dir)
+    setwd(current_dir)
 }
 
 #' Copy runSmoothR.sh Script to a Specified Directory
 #'
 #' This function copies the 'runSmoothR.sh' script from the 'shell_helpers' folder
 #' of the package to a specified folder.
-#'
 #' @param dest_folder The destination folder where the script will be copied.
 CopyRunSmoothRScript <- function(dest_folder) {
 

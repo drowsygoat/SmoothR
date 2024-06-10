@@ -2,18 +2,18 @@
 % Please edit documentation in R/checkpoint.R
 \name{checkpoint}
 \alias{checkpoint}
-\title{Prints a Checkpoint Message with a Custom Comment in SLURM Output}
+\title{Print Custom Checkpoint Message in SLURM Output}
 \usage{
 checkpoint(comment)
 }
 \arguments{
-\item{comment}{A character string representing the comment to be appended to the checkpoint message.}
+\item{comment}{A character string for the checkpoint comment.}
 }
 \value{
-Prints a formatted checkpoint message to the console; returns invisible NULL.
+Prints to the console; returns invisible NULL.
 }
 \description{
-This function outputs a formatted checkpoint message that includes a user-defined comment.
+Outputs a checkpoint message with a user-defined comment. Useful for tracking progress in non-interactive SLURM tasks.
 }
 \examples{
 checkpoint("Data loaded successfully")

@@ -65,7 +65,9 @@ Modify specific settings interactively:
 - **`UpdateOutputDir(OUTPUT_DIR)`**: Specifies directory for storing outputs.
 - **`UpdatePartition(PARTITION)`**: Alters the Slurm partition for job queuing.
 - **`UpdateSuffix(SUFFIX)`**: Changes suffix for output file naming.
-
+- **`setEmail(email)`**: Configures `USER_E_MAIL` for SLURM notifications.
+- **`setAccount("snic123")`**: Configures `USER_E_MAIL` for SLURM notifications.
+  
 ### Robust Error Handling
 
 Prevent interruptions with `SafeExecute`, ensuring smooth execution even when errors occur. You can wrap big chunks of code as well (but it's safer to use it multiple times instead.)
@@ -78,5 +80,4 @@ SafeExecute({
 
 ## Support
 
-For more detailed documentation on each function and additional configuration tips, refer to the function help pages within R.
-```
+For more detailed documentation on each function and additional configuration tips, refer to the function help pages and manual.

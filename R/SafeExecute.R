@@ -1,33 +1,36 @@
-#' Handle Errors by Printing to Console and Invoking Checkpoint
+#' Safely Evaluate Expressions with Optional Logging
 #'
-#' Prints error messages using a checkpoint function and allows continuation of the script despite errors.
-#' @param e The error object captured by tryCatch.
-#' @keywords internal
-handle_error <- function(e) {
-    # Use the checkpoint function to print error messages and add any additional context or handling.
-    checkpoint(paste("Error occurred:", conditionMessage(e)))
-    invisible(NULL)  # Allow continuation without returning an error
-}
-
-#' Handle Warnings by Printing and Converting to Errors
+#' Evaluates an expression while handling errors and warnings to prevent unexpected script termination. 
+#' If enabled, captures and logs messages, warnings, and errors to a file, facilitating smooth operation 
+#' in production or critical scripts requiring uninterrupted execution.
 #'
-#' Handles warnings by logging them through the checkpoint function, then converts them to errors to ensure they are caught.
-#' @param w The warning object captured by tryCatch.
-#' @keywords internal
-handle_warning <- function(w) {
-    # Use the checkpoint function to print warning messages.
-    checkpoint(paste("Warning occurred:", conditionMessage(w)))
-    # Convert warning to error to ensure it is handled by the error handler
-    stop(w)
-}
-
-#' General Purpose Try-Catch Wrapper
-#'
-#' Executes code with robust error and warning handling to prevent script termination.
-#' The function utilizes a custom checkpoint system to manage and log all issues.
-#' @param expr An expression to evaluate.
-#' @keywords internal
+#' @param expr Expression to evaluate, which can range from a single command to a block of code.
+#' @param logging Boolean; enables logging of all runtime messages, warnings, and errors when set to TRUE.
+#' @param log_file String; specifies the file path for logging, effective only if `logging` is TRUE.
+#' @param envir Evaluation environment, defaulting to the parent frame.
+#' @return Returns the result of the evaluated expression, or NULL in the event of an error or warning.
 #' @export
-SafeExecute <- function(expr) {
-    tryCatch(eval(expr), error = handle_error, warning = handle_warning)
+#' @examples
+#' SafeExecute({
+#'   x <- rnorm(100)
+#'   if (mean(x) > 0) "Positive" else "Negative"
+#' }, logging = TRUE, log_file = "run_log.txt")
+SafeExecute <- function(expr, logging = FALSE, log_file = "R_console_log_file.log", envir = parent.frame()) {
+    handle_error <- function(e) {
+        checkpoint(paste("Error occurred:", conditionMessage(e)))
+        invisible(NULL)  # Allow continuation without returning an error
+    }
+
+    handle_warning <- function(w) {
+        checkpoint(paste("Warning occurred:", conditionMessage(w)))
+        invisible(NULL)  # Ensure continuation
+    }
+
+    if (isTRUE(logging)) {
+        sink(log_file, type = "message")
+        on.exit(sink(NULL, type = "message"), add = TRUE)
+    }
+
+    result <- tryCatch(eval(expr, envir = envir), error = handle_error, warning = handle_warning)
+    return(result)
 }

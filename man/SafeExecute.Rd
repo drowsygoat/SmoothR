@@ -2,15 +2,35 @@
 % Please edit documentation in R/SafeExecute.R
 \name{SafeExecute}
 \alias{SafeExecute}
-\title{General Purpose Try-Catch Wrapper}
+\title{Safely Evaluate Expressions with Optional Logging}
 \usage{
-SafeExecute(expr)
+SafeExecute(
+  expr,
+  logging = FALSE,
+  log_file = "R_console_log_file.log",
+  envir = parent.frame()
+)
 }
 \arguments{
-\item{expr}{An expression to evaluate.}
+\item{expr}{Expression to evaluate, which can range from a single command to a block of code.}
+
+\item{logging}{Boolean; enables logging of all runtime messages, warnings, and errors when set to TRUE.}
+
+\item{log_file}{String; specifies the file path for logging, effective only if `logging` is TRUE.}
+
+\item{envir}{Evaluation environment, defaulting to the parent frame.}
+}
+\value{
+Returns the result of the evaluated expression, or NULL in the event of an error or warning.
 }
 \description{
-Executes code with robust error and warning handling to prevent script termination.
-The function utilizes a custom checkpoint system to manage and log all issues.
+Evaluates an expression while handling errors and warnings to prevent unexpected script termination. 
+If enabled, captures and logs messages, warnings, and errors to a file, facilitating smooth operation 
+in production or critical scripts requiring uninterrupted execution.
 }
-\keyword{internal}
+\examples{
+SafeExecute({
+  x <- rnorm(100)
+  if (mean(x) > 0) "Positive" else "Negative"
+}, logging = TRUE, log_file = "run_log.txt")
+}

@@ -6,9 +6,10 @@
 \usage{
 checkDir(output_dir)
 }
+\arguments{
+\item{output_dir}{The target directory to validate or change to.}
+}
 \description{
-This function checks if the specified `output_dir` exists as a directory path.
-If it exists, the function changes the current working directory to `output_dir`.
-If it does not exist, the function checks if the current directory's name matches `output_dir`.
-If the current directory matches, it confirms the location; otherwise, it throws an error.
+Verifies if the specified `output_dir` exists and changes the working directory to it.
+Throws an error if the directory does not exist or does not match the current directory.
 }

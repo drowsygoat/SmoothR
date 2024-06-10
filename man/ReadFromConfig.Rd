@@ -4,27 +4,17 @@
 \alias{ReadFromConfig}
 \title{Read Configuration Values from a File}
 \usage{
-ReadFromConfig(key_to_check = NULL)
+ReadFromConfig(key_to_check)
 }
 \arguments{
-\item{key_to_check}{The specific configuration key to retrieve.
-This function will stop and throw an error if the key is not provided or not found.}
+\item{key_to_check}{The configuration key to retrieve.}
 
-\item{config_file}{The path to the configuration file.
-Defaults to '~/.temp_shell_exports'.}
+\item{config_file}{Path to the configuration file, defaults to '~/.temp_shell_exports'.}
 }
 \value{
-The value associated with the key_to_check from the configuration file.
+The value associated with the provided key.
 }
 \description{
-This function reads key-value pairs from a specified configuration file that mimics shell export syntax.
-It allows the retrieval of a specific configuration value by its key.
-}
-\details{
-The configuration file should contain lines formatted as `export KEY='VALUE'`.
-If the file does not exist or the key is not found, the function will stop with an error.
-}
-\examples{
-ReadFromConfig(key_to_check = "NUM_THREADS")
-
+Retrieves a specific configuration value by key from a file formatted as `export KEY='VALUE'`.
+Throws an error if the key is not found or if the file does not exist.
 }

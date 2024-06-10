@@ -7,10 +7,9 @@
 AddFat(fat_value = NULL)
 }
 \arguments{
-\item{fat_value}{Optional value for the FAT setting; default NULL means no update.}
+\item{fat_value}{Optional character indicating the FAT setting ('T', 'F', 't', 'f'); default NULL.}
 }
 \description{
-This function adds or updates the FAT setting in the configuration file. If no value is provided,
-it prints the current configuration. If a specific value is provided, it updates or adds the FAT setting
-with validation to ensure only acceptable values ('T', 'F', 't', 'f') are allowed.
+Adds or updates the FAT setting in the configuration file. It validates and accepts
+only 'T', 'F', 't', 'f' as values. If no value is provided, the current configuration is printed.
 }

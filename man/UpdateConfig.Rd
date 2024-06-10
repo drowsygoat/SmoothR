@@ -7,17 +7,17 @@
 UpdateConfig(key, value)
 }
 \arguments{
-\item{key}{The configuration key to update (character).}
+\item{key}{The configuration key to update.}
 
-\item{value}{The new value for the key (character).}
+\item{value}{The new value for the key.}
 }
 \value{
-Invisible NULL; updates the file in-place.
+Invisible NULL; updates are made in-place.
 }
 \description{
 This function updates a specific configuration key in the `.temp_shell_exports`
 file located in the user's home directory. If the key does not exist, it adds the key with the specified value.
 }
 \examples{
-UpdateConfig("NUM_THREADS", "8") # This example updates the number of threads.
+UpdateConfig("NUM_THREADS", "8")
 }
