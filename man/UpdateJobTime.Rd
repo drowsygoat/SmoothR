@@ -7,7 +7,7 @@
 UpdateJobTime(JOB_TIME_MINUTES)
 }
 \arguments{
-\item{JOB_TIME}{New job time to set.}
+\item{JOB_TIME_MINUTES}{New job time to set in minutes.}
 }
 \description{
 Update Job Time

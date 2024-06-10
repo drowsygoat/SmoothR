@@ -1,60 +1,61 @@
 #!/bin/bash
 
 # Description:
-# This script is a versatile batch launcher for SLURM jobs, specifically designed for running R scripts.
-# It automates the execution of iterative analyses with varying experimental parameters.
-# Key Features:
-# - Continuous monitoring of SLURM job outputs.
-# - Ability to cancel a job within 5 seconds of submission.
-# - Automatic detection and notification of "CHECKPOINT" occurrences in the output for streamlined status updates.
-# - For longer jobs tmux is good to keep the session alive.
+# A versatile SLURM job launcher for R scripts, designed for automated iterative analyses with monitoring capabilities.
+# Features include:
+# - Continuous monitoring of output for "CHECKPOINT" tags.
+# - Ability to cancel jobs quickly after submission.
+# - Utilization of tmux for maintaining session activity during long jobs.
 
 # SLURM Job Parameters:
-# NUM_THREADS: Number of threads
-# JOB_TIME: Job time (e.g., "2:00:00" for 2 hours)
-# OUTPUT_DIR: Output directory to store results
-# PARTITION: SLURM partition (e.g., devel, core, shared, memory, long, main)
-# SUFFIX: Suffix to append to output files ()
-# R_SCRIPT: The R script to run (e.g., my_analysis.R)
-# Additional features include timestamp creation, workspace and session data saving.
+# NUM_THREADS: Number of threads (default: 1)
+# JOB_TIME: Job duration in format D-HH:MM (default: "00:05:00")
+# OUTPUT_DIR: Directory to store results (default: "./output_dir")
+# PARTITION: SLURM partition (default: "devel")
+# SUFFIX: Suffix for output files, using a timestamp by default.
+# R_SCRIPT: The R script filename to execute.
 
-# Create timestamp
+# Creating a timestamp for session and file naming
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
-config_file="$HOME/.temp_shell_exports"
+# Searching for configuration file
+found_files=$(find . -type f | grep "temp_shell_exports")
+
+# Converting search results to an array
+IFS=$'\n' read -r -a files_array <<< "$found_files"
+
+# Ensuring a unique configuration file is found
+if [ "${#files_array[@]}" -eq 1 ]; then
+    echo "Unique configuration file found."
+    config_file="${files_array[0]}"
+    echo "Using configuration from: $config_file"
+else
+    echo "Error: No configuration file found or multiple configurations present."
+    exit 1
+fi
 
 source $config_file
 
-# Set default parameters if unset
+# Setting default parameters if they are not already set
 NUM_THREADS="${NUM_THREADS:-1}"
-JOB_TIME="${JOB_TIME:-"0:05:00"}"
+JOB_TIME="${JOB_TIME:-"00:05:00"}"
 OUTPUT_DIR="${OUTPUT_DIR:-"./output_dir"}"
 PARTITION="${PARTITION:-"devel"}"
 SUFFIX="${SUFFIX:-"$(date +%Y%m%d_%H%M%S)"}"
+USER_E_MAIL="${USER_E_MAIL:-user_did_not_provide_email@example.com}"
 
-# Function to display help if no arguments are provided
+# Function to display script usage
 function display_help() {
     echo "Usage: $0 R_SCRIPT [ARG1 ARG2 ...]"
     echo
-    echo "This script launches SLURM jobs for R scripts with given parameters."
-    echo
-    echo "Arguments:"
-    echo "  R_SCRIPT    The R script to execute."
-    echo "  ARG1, ARG2, ... Additional arguments specific to the R analysis."
-    echo
-    echo "Environment variables used:"
-    echo "  NUM_THREADS    Number of threads (default: 1)"
-    echo "  JOB_TIME       Job duration (default: 00:05:00)"
-    echo "  OUTPUT_DIR     Directory to store results (default: ./output_dir)"
-    echo "  PARTITION      SLURM partition (default: devel)"
-    echo "  SUFFIX         Timestamp is the default"
+    echo "Launches a SLURM job to execute an R script with the specified parameters."
     echo
     echo "Example:"
-    echo "  ./runSmoothR.sh my_exe.R genome_file.gtf"
+    echo "  ./runSmoothR.sh my_analysis.R additional_arguments"
     exit 1
 }
 
-# Display help
+# Display help if no script argument provided
 if [ "$#" -lt 1 ]; then
     display_help
 fi
@@ -64,14 +65,20 @@ R_SCRIPT="$1"
 shift 1
 ARGUMENTS="$@"
 
-# Display current settings
-echo -e "Parameters set. Here are the current settings:"
-echo -e "Number of threads: $NUM_THREADS"
-echo -e "Job time: $JOB_TIME"
-echo -e "Output directory: $OUTPUT_DIR"
-echo -e "Partition: $PARTITION"
-echo -e "Suffix: $SUFFIX"
-echo -e "Timestamp: $TIMESTAMP"
+# Define color settings using tput
+color_key=$(tput setaf 4)   # Blue color for keys
+color_value=$(tput setaf 2) # Green color for values
+color_reset=$(tput sgr0)    # Reset to default terminal color
+
+# Display settings
+echo "Parameters set. Here are the current settings:"
+echo -e "${color_key}Number of threads: ${color_value}$NUM_THREADS${color_reset}"
+echo -e "${color_key}Job time: ${color_value}$JOB_TIME${color_reset}"
+echo -e "${color_key}Output directory: ${color_value}$OUTPUT_DIR${color_reset}"
+echo -e "${color_key}Partition: ${color_value}$PARTITION${color_reset}"
+echo -e "${color_key}Suffix: ${color_value}$SUFFIX${color_reset}"
+echo -e "${color_key}Timestamp: ${color_value}$TIMESTAMP${color_reset}"
+echo -e "${color_key}Account: ${color_value}$USER_ACCOUNT${color_reset}"
 
 # Define functions to check output file modifications and monitor job status
 function was_file_modified_last_minute() {
@@ -98,8 +105,8 @@ check_file() {
             if [[ $current_count -gt $phrase_found_count ]]; then
             phrase_found_count=$current_count
             last_keyword_found=$(grep -o "$KEYWORD" "$OUTPUT_FILE" | tail -1)
-            echo "$last_keyword_found"
             tput setaf 3 # yellow ;)
+            echo ""
             echo "$(echo $last_keyword_found | sed 's/CHECKPOINT_//g')"
             tput sgr 0
             echo -n "Monitoring job status for Job ID: $current_status" # single instance below dots    
@@ -143,14 +150,14 @@ SBATCH_SCRIPT="${OUTPUT_DIR}/slurm_reports/slurm_submission_${TIMESTAMP}.sh"
 
 cat <<EOF > "$SBATCH_SCRIPT"
 #!/bin/bash -eu
-#SBATCH -A ${COMPUTE_ACCOUNT_LECH}
+#SBATCH -A $COMPUTE_ACCOUNT_LECH
 #SBATCH -J ${OUTPUT_DIR}
 #SBATCH -o ${OUTPUT_DIR}/slurm_reports/%x_%j_${TIMESTAMP}.out
 #SBATCH -t $JOB_TIME # job time
 #SBATCH -e ${OUTPUT_DIR}/slurm_reports/%x_%j_${TIMESTAMP}.err
-#SBATCH -p ${PARTITION}
-#SBATCH -n ${NUM_THREADS}
-#SBATCH --mail-user=example@email.com
+#SBATCH -p $PARTITION
+#SBATCH -n $NUM_THREADS
+#SBATCH --mail-user=$USER_E_MAIL
 #SBATCH --mail-type=ALL
 
 module load R/4.1.1
@@ -158,6 +165,25 @@ module load R_packages/4.1.1
 
 ./\$R_SCRIPT \$OUTPUT_DIR \$R_SCRIPT \$SUFFIX \$TIMESTAMP \$NUM_THREADS \$ARGUMENTS 2>&1 | tee \$OUTPUT_DIR/R_console_output/R_output_\$TIMESTAMP.log >> \$OUTPUT_DIR/R_output_cumulative.log
 EOF
+
+# cat <<EOF > "$FAT_SCRIPT"
+# #!/bin/bash -eu
+# #SBATCH -A $COMPUTE_ACCOUNT_LECH
+# #SBATCH -J ${OUTPUT_DIR}
+# #SBATCH -o ${OUTPUT_DIR}/slurm_reports/%x_%j_${TIMESTAMP}.out
+# #SBATCH -t $JOB_TIME # job time
+# #SBATCH -e ${OUTPUT_DIR}/slurm_reports/%x_%j_${TIMESTAMP}.err
+# #SBATCH -p $PARTITION
+# #SBATCH -n $NUM_THREADS
+# #SBATCH -C fat
+# #SBATCH --mail-user=lecka@liu.se
+# #SBATCH --mail-type=ALL
+
+# module load R/4.1.1
+# module load R_packages/4.1.1
+
+# ./\$R_SCRIPT \$OUTPUT_DIR \$R_SCRIPT \$SUFFIX \$TIMESTAMP \$NUM_THREADS \$ARGUMENTS 2>&1 | tee \$OUTPUT_DIR/R_console_output/R_output_\$TIMESTAMP.log >> \$OUTPUT_DIR/R_output_cumulative.log
+# EOF
 
 echo -n "Job will start in "
 

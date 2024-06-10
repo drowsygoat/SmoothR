@@ -3,10 +3,11 @@ Title: Manage R Sessions while using SLURM repetitively
 Version: 0.0.0.9000
 Authors@R: c(
     person("Lech", "Kaczmarczyk", email = "lecka@liu.se", role = c("aut", "cre")))
-)Description: Manage R Sessions while using SLURM repetitively
+Description: Manage R Sessions while using SLURM repetitively
 License: GPL-3
 Imports:
     dplyr,
+    lubridate,
     sessioninfo
 Suggests:
     testthat

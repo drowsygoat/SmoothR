@@ -2,13 +2,13 @@
 % Please edit documentation in R/ManageSessions.R
 \name{QuitNow}
 \alias{QuitNow}
-\title{Quit R when not interactive}
+\title{Quit R Session when not Interactive}
 \usage{
 QuitNow()
 }
 \description{
-This function terminates the current R session and exits with status 0, indicating successful completion.
-It is particularly useful for scripting and batch processing when you want to run the script up to a point (practically equivalent to commenting the remained of the script). Remember to combine with a function SaveNow, as QuitNow does not save anything, just exits!
+Terminates the current R session non-interactively with a success status. Useful in scripts and batch processing.
+Does not save the session before exiting. Pair with SaveNow() to save data first.
 }
 \examples{
 QuitNow()
