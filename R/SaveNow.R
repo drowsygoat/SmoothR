@@ -1,5 +1,5 @@
 
-#' Save the Current R Session for Slurm Execution and Log Session Information
+#' Save the Current R Session
 #'
 #' This function saves the current R session into a .RData file, enabling the session
 #' to be resumed in future Slurm job executions. It also logs session details
@@ -14,12 +14,13 @@
 #' @examples
 #' SaveNow()  # Save using default settings
 #' @export
-SaveNow <- function(session_file_name = NULL, timestamp = format(Sys.time(), "%Y%m%d-%H%M%S")) {
+SaveNow <- function(session_file_name = NULL, timestamp = NULL) {
+
     requireNamespace("sessioninfo", quietly = TRUE)
 
     if (interactive()) {
+
         output_dir <- ReadFromConfig("OUTPUT_DIR")
-        checkDir(output_dir)
 
         full_path <- file.path(output_dir, paste0("session_", timestamp, ".RData"))
 
@@ -32,6 +33,7 @@ SaveNow <- function(session_file_name = NULL, timestamp = format(Sys.time(), "%Y
     }
     
     args <- commandArgs(trailingOnly = TRUE)
+    
     if (is.null(session_file_name)) {
         if (length(args) > 0) {
             session_file_name <- file.path(output_dir, paste0(args[1], "Data"))
@@ -56,6 +58,7 @@ SaveNow <- function(session_file_name = NULL, timestamp = format(Sys.time(), "%Y
 
     SafeExecute({
         save.image(file = session_file_name)
+        checkpoint("Session file '", session_file_name, "' saved successfully.")
         message("Session file '", session_file_name, "' saved successfully.")
     })
 }

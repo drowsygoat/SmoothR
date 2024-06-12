@@ -2,12 +2,9 @@
 % Please edit documentation in R/SaveNow.R
 \name{SaveNow}
 \alias{SaveNow}
-\title{Save the Current R Session for Slurm Execution and Log Session Information}
+\title{Save the Current R Session}
 \usage{
-SaveNow(
-  session_file_name = NULL,
-  timestamp = format(Sys.time(), "\%Y\%m\%d-\%H\%M\%S")
-)
+SaveNow(session_file_name = NULL, timestamp = NULL)
 }
 \arguments{
 \item{session_file_name}{string (optional); the filename for saving the session.

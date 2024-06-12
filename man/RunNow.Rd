@@ -2,35 +2,22 @@
 % Please edit documentation in R/RunNow.R
 \name{RunNow}
 \alias{RunNow}
-\title{RunNow Function}
+\title{Run a R script and submit it to Slurm for execution.}
 \usage{
-RunNow(script_name = NULL, verbose = TRUE)
+RunNow(script_name, output_file = NULL, lint = FALSE, verbose = FALSE)
 }
 \arguments{
-\item{config_file}{A string specifying the path to the configuration file for setting required
-environment variables. Defaults to "~/.temp_shell_exports".}
+\item{script_name}{The name of the R script to run.}
 
-\item{output_file}{A string specifying the path to the file where stdout and stderr from the Slurm
-job will be directed. If NULL, outputs will not be redirected. Defaults to NULL.}
+\item{output_file}{The name of the output file.}
+
+\item{lint}{Whether to lint the script instead of running it.}
+
+\item{verbose}{Whether to print verbose output.}
 }
 \value{
-The value of the `OUTPUT_DIR` environment variable, which indicates the output directory.
+NA
 }
 \description{
-This function is designed to submit R scripts to a Slurm job scheduler. It initializes the environment
-by reading configurations from a shell script located in the user's home directory. The function retrieves
-the `OUTPUT_DIR` environment variable, and submits the job using a designated Slurm script. The `script_name`
-variable is defined here and logged for subsequent analysis. If `script_name` is not redefined during execution,
-its initial value is used.
-}
-\details{
-Instead of using this function, one might find it convenient to use a multiplexed terminal for live
-reporting. This can be achieved by running:
-./runSmoothR.sh script_name.R [optional args, which will start from position 6 in args]
-
-Note: The optional arguments are available starting from the sixth position in `args`.
-}
-\examples{
-RunNow()  # Uses default configuration file and no output redirection
-RunNow(output_file = "path/to/output.log")
+This function runs a R script and submits it to Slurm for execution.
 }

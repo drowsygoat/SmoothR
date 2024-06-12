@@ -76,6 +76,7 @@ UpdateSuffix <- function(SUFFIX) {
 #' @importFrom lubridate ymd_hms
 #' @noRd
 ConvertTimestamp <- function(timestamp) {
+
     if (!grepl("^\\d{8}_\\d{6}$", timestamp)) {
         stop("Invalid timestamp format. Expected 'YYYYMMDD_HHMMSS'.")
     }
@@ -100,9 +101,11 @@ ConvertTimestamp <- function(timestamp) {
 #' @examples
 #' UpdateConfig("NUM_THREADS", "8")
 UpdateConfig <- function(key, value) {
+
     if (!interactive()) {
         cat("This function can only be run in an interactive R session.\n")
         return(invisible(NULL))
+        
     }
     config_file <- Sys.getenv("HOME")  # Assume config file is in the home directory
     config_path <- file.path(config_file, ".temp_shell_exports")
@@ -194,9 +197,9 @@ ReadFromConfig <- function(key_to_check) {
         return(invisible(NULL))
     }
 
-    current_dir <- getwd()
+    # current_dir <- getwd()
 
-    checkDir(output_dir)
+    # checkDir(output_dir)
     
     config_file <- list.files(path = output_dir, pattern = "temp_shell_exports", all.files = TRUE, full.names = TRUE)[1]
 
@@ -226,7 +229,7 @@ ReadFromConfig <- function(key_to_check) {
 
     return(config_values[[key_to_check]])
 
-    setwd(current_dir)
+    # setwd(current_dir)
 
 }
 

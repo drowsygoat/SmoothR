@@ -1,0 +1,6 @@
+export NUM_THREADS='1'
+export JOB_TIME='0-00:05:00'
+export OUTPUT_DIR='test'
+export PARTITION='devel'
+export SUFFIX='suffix'
+export FAT='F'

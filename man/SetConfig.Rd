@@ -18,5 +18,5 @@ The script, formatted for environment variable export, is intended for shell sou
 Includes conversion of job time from minutes to D-H:M:S format.
 }
 \examples{
-set_config_interactively() # Run this in an interactive R session
+SetConfig() # Run this in an interactive R session
 }

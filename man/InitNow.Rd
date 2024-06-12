@@ -4,7 +4,7 @@
 \alias{InitNow}
 \title{Initialize Session After Slurm Execution}
 \usage{
-InitNow(session_file_name = NULL)
+InitNow()
 }
 \arguments{
 \item{session_file_name}{The name of the session file to load, defaults to the first command line argument with ".RData" appended.}

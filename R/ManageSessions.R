@@ -7,22 +7,26 @@
 #' @examples
 #' InitNow()
 #' @export
-InitNow <- function(session_file_name = NULL) {
+InitNow <- function() {
     
     if (interactive()) {
         stop("This function is not available in interactive mode.")
     }
 
     # Fetch command line arguments if no session file name is provided
-    if (is.null(session_file_name)) {
-        args <- commandArgs(trailingOnly = TRUE)
-        if (length(args) > 0) {
-            session_file_name <- file.path(output_dir, paste0(args[1], ".RData"))
-            output_dir <- args[1]  # Assuming the first argument is also the output directory
-        } else {
-            stop("No command line arguments detected.")
-        }
+    args <- commandArgs(trailingOnly = TRUE)
+    if (lenth(args) < 5) {
+        stop("Args missing!")
     }
+
+    output_dir <- args[1]
+    script_name <- args[2]
+    suffix <- args[3]
+    timestamp <- args[4]
+    threads <- as.integer(args[5])
+
+    session_file_name <- file.path(output_dir, paste0(args[1], ".RData"))
+            output_dir <- args[1]  # Assuming the first argument is also the output directory
 
     # Check if the output directory exists
     if (!dir.exists(output_dir)) {
@@ -46,11 +50,10 @@ InitNow <- function(session_file_name = NULL) {
     }
 }
 
-
 #' Quit R Session when not Interactive
 #'
 #' Terminates the current R session non-interactively with a success status. Useful in scripts and batch processing.
-#' Does not save the session before exiting. Pair with SaveNow() to save data first.
+#' Does not save the session before exiting. Precede with SaveNow() to save data first.
 #'
 #' @examples
 #' QuitNow()

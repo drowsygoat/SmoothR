@@ -5,16 +5,21 @@
 #' only if the path is not already present.
 #'
 #' @export
+
 InitSmoothR <- function(force = F) {
+    
     current_dir <- getwd()
-    if ( ! interactive() ) {
+
+    if (!interactive()) {
         return(invisible(NULL))
     }
+
     output_dir <- SetConfig(force = force)
     output_dir <<- normalizePath(output_dir)
     # checkDir(output_dir)
     CopyRunSmoothRScript(output_dir)
     setwd(current_dir)
+
 }
 
 #' Copy runSmoothR.sh Script to a Specified Directory
