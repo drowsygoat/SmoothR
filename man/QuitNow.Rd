@@ -8,7 +8,7 @@ QuitNow()
 }
 \description{
 Terminates the current R session non-interactively with a success status. Useful in scripts and batch processing.
-Does not save the session before exiting. Pair with SaveNow() to save data first.
+Does not save the session before exiting. Precede with SaveNow() to save data first.
 }
 \examples{
 QuitNow()

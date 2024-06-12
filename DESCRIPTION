@@ -8,7 +8,8 @@ License: GPL-3
 Imports:
     dplyr,
     lubridate,
-    sessioninfo
+    sessioninfo,
+    lintr
 Suggests:
     testthat
 Encoding: UTF-8

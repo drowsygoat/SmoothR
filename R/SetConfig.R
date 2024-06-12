@@ -9,7 +9,7 @@
 #' @return No return value; outputs file path and contents to console.
 #' @export
 #' @examples
-#' set_config_interactively() # Run this in an interactive R session
+#' SetConfig() # Run this in an interactive R session
 SetConfig <- function(force = F) {
     if (!interactive()) {
         cat("This function can only be run in an interactive R session.\n")
