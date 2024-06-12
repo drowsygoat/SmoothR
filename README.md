@@ -55,3 +55,4 @@ SafeExecute({
   result <- potentiallyFailingFunction()
 })
 
+![Example](images/your-image-filename.png)
