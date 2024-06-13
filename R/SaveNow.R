@@ -22,7 +22,7 @@ SaveNow <- function(session_file_name = NULL, timestamp = NULL) {
 
         output_dir <- ReadFromConfig("OUTPUT_DIR")
 
-        full_path <- file.path(output_dir, paste0("session_", timestamp, ".RData"))
+        full_path <- file.path(output_dir, paste0("session_", output_dir, ".RData"))
 
         suppressWarnings(try(rm(list = c("args"), envir = .GlobalEnv), silent = TRUE))
 
