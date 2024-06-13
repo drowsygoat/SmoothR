@@ -15,7 +15,7 @@ InitNow <- function() {
 
     # Fetch command line arguments if no session file name is provided
     args <- commandArgs(trailingOnly = TRUE)
-    if (lenth(args) < 5) {
+    if (length(args) < 5) {
         stop("Args missing!")
     }
 

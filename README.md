@@ -30,12 +30,13 @@ library(SmoothR)
 
 # Job Management
 
-`run_slurm()`: Submits the current script to Slurm.
+- `RunNow(script_name=my_script.R)`: Submits the current script to Slurm.
+- `RunNow(script_name=my_script.R, lint = TRUE)`: Lints the current script instead.
 
 # Debugging and Management
 
 - `checkpoint()`: Logs progress points within scripts, aiding in debugging.
-- `QuitNow()`: Ends a script segment positively, signaling completion.
+- `QuitNow()`: Ends a script segment at a specific point.
 - `SaveMe()`: Saves current settings for reuse in later Slurm job scripts.
 
 # Interactive Update Functions
@@ -45,8 +46,8 @@ library(SmoothR)
 - `UpdateOutputDir(OUTPUT_DIR)`: Specifies directory for storing outputs.
 - `UpdatePartition(PARTITION)`: Alters the Slurm partition for job queuing.
 - `UpdateSuffix(SUFFIX)`: Changes suffix for output file naming.
-- `setEmail(email)`: Configures USER_E_MAIL for SLURM notifications.
-- `setAccount("snic123")`: Configures USER_E_MAIL for SLURM notifications.
+- `setEmail(email)`: Configures E-mail for SLURM notifications (sets variable).
+- `setAccount("snic123")`: Configures user account (sets variable).
 
 # Robust Error Handling
 
@@ -54,5 +55,7 @@ library(SmoothR)
 SafeExecute({
   result <- potentiallyFailingFunction()
 })
+
 ```
 ![Example](images/screen.png)
+```
