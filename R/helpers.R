@@ -238,7 +238,6 @@ ReadFromConfig <- function(key_to_check) {
 #' Verifies if the specified `output_dir` exists and changes the working directory to it.
 #' Throws an error if the directory does not exist or does not match the current directory.
 #' @param output_dir The target directory to validate or change to.
-#' @export
 checkDir <- function(output_dir) {
 
     if (!interactive()) {
