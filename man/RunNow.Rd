@@ -4,7 +4,7 @@
 \alias{RunNow}
 \title{Run a R script and submit it to Slurm for execution.}
 \usage{
-RunNow(script_name, output_file = NULL, lint = FALSE, verbose = FALSE)
+RunNow(script_name, output_file = NULL, lint = FALSE)
 }
 \arguments{
 \item{script_name}{The name of the R script to run.}
@@ -12,8 +12,6 @@ RunNow(script_name, output_file = NULL, lint = FALSE, verbose = FALSE)
 \item{output_file}{The name of the output file.}
 
 \item{lint}{Whether to lint the script instead of running it.}
-
-\item{verbose}{Whether to print verbose output.}
 }
 \value{
 NA
