@@ -7,48 +7,56 @@
 #' @examples
 #' InitNow()
 #' @export
-InitNow <- function() {
+InitNow <- function(session_file_name = NULL) {
     
     if (interactive()) {
         stop("This function is not available in interactive mode.")
     }
+    
+    output_dir <- ReadFromConfig("OUTPUT_DIR")
 
-    # Fetch command line arguments if no session file name is provided
-    args <- commandArgs(trailingOnly = TRUE)
-    if (length(args) < 5) {
-        stop("Args missing!")
+    if (is.null(session_file_name)) {
+        session_file_name <- paste0(output_dir, ".RData")
     }
+    cat("OUTPUTDIR")
+    cat(output_dir)
+        cat("OUTPUTDIR")
 
-    output_dir <- args[1]
-    script_name <- args[2]
-    suffix <- args[3]
-    timestamp <- args[4]
-    threads <- as.integer(args[5])
-
-    session_file_name <- file.path(output_dir, paste0(args[1], ".RData"))
-            output_dir <- args[1]  # Assuming the first argument is also the output directory
-
-    # Check if the output directory exists
-    if (!dir.exists(output_dir)) {
-        stop("Output directory does not exist.")
+    # Ensure output directory exists
+    if (basename(getwd()) != output_dir) {
+        stop("Wrong dir. Please first navigate the:", output_dir)
     }
-
-    # checkDir()
 
     # Load the session file if it exists
     if (file.exists(session_file_name)) {
-
         load(session_file_name, envir = .GlobalEnv)
         message("Session file '", session_file_name, "' loaded successfully.")
         checkpoint(paste("Session file '", session_file_name, "' loaded successfully."))
-
     } else {
-
         message("Session file '", session_file_name, "' does not exist. Continuing without it.")
         checkpoint(paste("Session file '", session_file_name, "' does not exist. Continuing without it."))
-        
     }
+
+    args <- commandArgs(trailingOnly = TRUE)
+    
+    if (length(args) < 5) {
+        stop("Args missing!")
+    }
+    
+    cat("List of command line arguments:\n")
+    for (i in seq_along(args)) {
+        cat(sprintf("Arg %d: %s\n", i, args[i]))
+    }
+
+    list(
+        output_dir = args[1],
+        script_name = args[2],
+        suffix = args[3],
+        timestamp = args[4],
+        threads = args[5]
+    )
 }
+
 
 #' Quit R Session when not Interactive
 #'

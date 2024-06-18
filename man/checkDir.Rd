@@ -2,14 +2,15 @@
 % Please edit documentation in R/helpers.R
 \name{checkDir}
 \alias{checkDir}
-\title{Change Working Directory or Verify Current Directory}
+\title{Check and Adjust Working Directory Based on Configuration}
 \usage{
-checkDir(output_dir)
+checkDir()
 }
-\arguments{
-\item{output_dir}{The target directory to validate or change to.}
+\value{
+None; function is used for its side effects (changing directories or stopping execution).
 }
 \description{
-Verifies if the specified `output_dir` exists and changes the working directory to it.
-Throws an error if the directory does not exist or does not match the current directory.
+Verifies the presence of required temp files in the current directory and ensures
+the output directory matches the expected configuration. Adjusts the working
+directory if necessary, based on the configuration.
 }

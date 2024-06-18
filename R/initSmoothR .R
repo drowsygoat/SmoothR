@@ -6,20 +6,18 @@
 #'
 #' @export
 
-InitSmoothR <- function(force = F) {
-    
-    current_dir <- getwd()
+initSmoothR <- function(force = F) {
 
     if (!interactive()) {
         return(invisible(NULL))
     }
 
-    output_dir <- SetConfig(force = force)
-    output_dir <<- normalizePath(output_dir)
-    # checkDir(output_dir)
+    output_dir <- setConfig(force = force)
     CopyRunSmoothRScript(output_dir)
-    setwd(current_dir)
-
+    message(paste("Project directory is:", normalizePath(output_dir)))
+    setwd(output_dir)
+    message("Changed to the directory of the project. Copy your script(s) here manually so that everything is kept tidy.")
+    
 }
 
 #' Copy runSmoothR.sh Script to a Specified Directory

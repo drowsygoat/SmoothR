@@ -69,7 +69,7 @@ function display_help() {
     echo "Launches a SLURM job to execute an R script with the specified parameters."
     echo
     echo "Example:"
-    echo "  ./runSmoothR.sh my_analysis.R additional_arguments"
+    echo " ./runSmoothR.sh my_analysis.R additional_arguments"
     exit 1
 }
 
@@ -111,7 +111,7 @@ function was_file_modified_last_minute() {
 
 check_file() {
     # Define output file path
-    local OUTPUT_FILE="${OUTPUT_DIR}/R_console_output/R_output_${TIMESTAMP}.log"
+    local OUTPUT_FILE="R_console_output/R_output_${TIMESTAMP}.log"
     
     # Define the regex pattern
     local KEYWORD='^CHECKPOINT.*$'
@@ -151,20 +151,20 @@ function is_job_active() {
     return $(( active_jobs == 0 ))
 }
 
-# Check and create output directory
-if [ -d "$OUTPUT_DIR" ]; then
-    tput setaf 1
-    echo -e "WARNING: The directory $OUTPUT_DIR already exists files may be overwritten."
-    tput sgr 0
-fi
+# # Check and create output directory
+# if [ -d "$OUTPUT_DIR" ]; then
+#     tput setaf 1
+#     echo -e "WARNING: The directory $OUTPUT_DIR already exists files may be overwritten."
+#     tput sgr 0
+# fi
 
-mkdir -p "${OUTPUT_DIR}"
-mkdir -p "${OUTPUT_DIR}/slurm_reports"
-mkdir -p "${OUTPUT_DIR}/R_console_output"
+# mkdir -p "${OUTPUT_DIR}"
+mkdir -p "slurm_reports"
+mkdir -p "R_console_output"
 
 # Prepare and execute SLURM job
 
-SBATCH_SCRIPT="${OUTPUT_DIR}/slurm_reports/slurm_submission_${TIMESTAMP}.sh"
+SBATCH_SCRIPT="slurm_reports/slurm_submission_${TIMESTAMP}.sh"
 
 if [[ $FAT == "F" ]]; then
 
@@ -172,17 +172,17 @@ if [[ $FAT == "F" ]]; then
 #!/bin/bash -eu
 #SBATCH -A ${COMPUTE_ACCOUNT}
 #SBATCH -J ${OUTPUT_DIR}
-#SBATCH -o ${OUTPUT_DIR}/slurm_reports/%x_%j_${TIMESTAMP}.out
+#SBATCH -o slurm_reports/%x_%j_${TIMESTAMP}.out
 #SBATCH -t $JOB_TIME # job time
-#SBATCH -e ${OUTPUT_DIR}/slurm_reports/%x_%j_${TIMESTAMP}.err
+#SBATCH -e slurm_reports/%x_%j_${TIMESTAMP}.err
 #SBATCH -p ${PARTITION}
 #SBATCH -n ${NUM_THREADS}
 #SBATCH --mail-user=${USER_E_MAIL}
 #SBATCH --mail-type=ALL
 
-source $module_file
+source \$module_file
 
-\$R_SCRIPT \$OUTPUT_DIR \$R_SCRIPT \$SUFFIX \$TIMESTAMP \$NUM_THREADS \$ARGUMENTS 2>&1 | tee \$OUTPUT_DIR/R_console_output/R_output_\$TIMESTAMP.log >> \$OUTPUT_DIR/R_output_cumulative.log
+./\$R_SCRIPT \$OUTPUT_DIR \$R_SCRIPT \$SUFFIX \$TIMESTAMP \$NUM_THREADS \$ARGUMENTS 2>&1 | tee R_console_output/R_output_\$TIMESTAMP.log >> R_console_output/R_output_cumulative.log
 EOF
 
 else
@@ -191,18 +191,18 @@ else
 #!/bin/bash -eu
 #SBATCH -A ${COMPUTE_ACCOUNT}
 #SBATCH -J ${OUTPUT_DIR}
-#SBATCH -o ${OUTPUT_DIR}/slurm_reports/%x_%j_${TIMESTAMP}.out
+#SBATCH -o slurm_reports/%x_%j_${TIMESTAMP}.out
 #SBATCH -t $JOB_TIME # job time
-#SBATCH -e ${OUTPUT_DIR}/slurm_reports/%x_%j_${TIMESTAMP}.err
+#SBATCH -e slurm_reports/%x_%j_${TIMESTAMP}.err
 #SBATCH -p ${PARTITION}
 #SBATCH -n ${NUM_THREADS}
 #SBATCH -C fat
 #SBATCH --mail-user=${USER_E_MAIL}
 #SBATCH --mail-type=ALL
 
-source $module_file
+source \$module_file
 
-\$R_SCRIPT \$OUTPUT_DIR \$R_SCRIPT \$SUFFIX \$TIMESTAMP \$NUM_THREADS \$ARGUMENTS 2>&1 | tee \$OUTPUT_DIR/R_console_output/R_output_\$TIMESTAMP.log >> \$OUTPUT_DIR/R_output_cumulative.log
+./\$R_SCRIPT \$OUTPUT_DIR \$R_SCRIPT \$SUFFIX \$TIMESTAMP \$NUM_THREADS \$ARGUMENTS 2>&1 | tee R_console_output/R_output_\$TIMESTAMP.log >> R_console_output/R_output_cumulative.log
 EOF
 
 fi
@@ -220,6 +220,7 @@ for ((i=3; i>0; i--)); do
 done
 
 chmod +x "$SBATCH_SCRIPT"
+chmod +x "$R_SCRIPT"
 echo -e "\nRunning: $SBATCH_SCRIPT"
 
 # Submit the job to Slurm
@@ -228,18 +229,26 @@ export NUM_THREADS
 export OUTPUT_DIR
 export TIMESTAMP
 export ARGUMENTS
+export module_file
 
 JOB_ID=$(sbatch --parsable "$SBATCH_SCRIPT" || exit 1)
 start=$(date +%s)
 
 tput setaf 5
-echo -n "Job ID $JOB_ID submitted at $TIMESTAMP. Press 'c' at any time to cancel"
+echo -e "Job ID $JOB_ID submitted at $TIMESTAMP.\nPress 'c' at any time to cancel.\nPress 'q' at any time to stop monitoring.\nCancelling will discard the log files."
 tput sgr 0
 
 read -t 5 -n 1 input
 if [[ $input = "c" ]]; then
     # User pressed 'c', cancel the job using scancel
     scancel $JOB_ID
+    # rm -rf slurm_reports/%x_%j_${TIMESTAMP}.out
+    # rm -rf slurm_reports/%x_%j_${TIMESTAMP}.err
+    # rm -rf R_console_output/R_output_${TIMESTAMP}.log
+    find . -type f | grep -E "$TIMESTAMP" | while read -r file; do
+        echo "Removing files"
+        rm -rf "$file"
+    done
     tput setaf 1
     echo ""
     echo "Operation canceled by the user."
@@ -264,11 +273,21 @@ while is_job_active; do
     if [[ $input = "c" ]]; then
     # User pressed 'c', cancel the job using scancel
         scancel $JOB_ID
+        rm -rf slurm_reports/%x_%j_${TIMESTAMP}.out
+        rm -rf slurm_reports/%x_%j_${TIMESTAMP}.err
+        rm -rf R_console_output/R_output_${TIMESTAMP}.log
         tput setaf 1
         echo ""
         echo "Operation canceled by the user."
         tput sgr 0
         exit 1
+    elif [[ $input = "q" ]]; then
+        # User pressed 'q', exit with status 0
+        tput setaf 1
+        echo ""
+        echo "Monitoring stopped by the user."
+        tput sgr 0
+        exit 0
     else
         unset input
     fi
@@ -288,14 +307,23 @@ echo "Runtime was $runtimeh hours ($runtimem minutes)."
 
 # Output result handling
 
-if [[ $? -eq 0 ]]; then
-    echo -e "Job ended. Do you want to see it now?\n"
-    read answer  # Capture user input
+echo -e "Job ended. Do you want to see R_output now? Press 'Y' to view, any other key to exit."
+
+# Wait for 5 seconds for a single key press
+if read -n 1 -s -r -t 5 answer; then
+    echo # Move to a new line
+    # Convert the answer to lowercase
     answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
     if [[ "$answer" == "y" ]]; then
-        cat "${OUTPUT_DIR}/R_console_output/R_output_${TIMESTAMP}.log" | more
+        # Show the R output if user inputs 'y'
+        cat "R_console_output/R_output_${TIMESTAMP}.log" | more
+    else
+        # Exit if the user input is not 'y'
+        echo "Exiting without showing R output."
+        exit 0
     fi
 else
-    echo "SLURM job failed. Check the error file for details."
-    cat $(find ${OUTPUT_DIR}/slurm_reports -maxdepth 1 -type f -printf '%T@ %p\n' | sort -k1,1nr | head -n1 | cut -d' ' -f2-) | more
+    # Exit if no input is given within 5 seconds
+    echo -e "\nNo input received. Exiting without showing R output."
+    exit 0
 fi
