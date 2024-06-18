@@ -11,14 +11,17 @@
 #' @return Returns the result of the evaluated expression, or NULL in the event of an error or warning.
 #' @export
 #' @examples
-#' SafeExecute({
+#' safeExecute({
 #'   x <- rnorm(100)
 #'   if (mean(x) > 0) "Positive" else "Negative"
 #' }, logging = TRUE, log_file = "run_log.txt")
-SafeExecute <- function(expr, logging = FALSE, log_file = "R_console_log_file.log", envir = parent.frame()) {
+safeExecute <- function(expr, logging = FALSE, log_file = "R_console_log_file.log", envir = parent.frame()) {
 
     if (interactive()) {
         result <- eval(expr, envir)
+        if (is.null(result)) {
+            return(invisible(NULL))
+        }
         return(result)
     }
 

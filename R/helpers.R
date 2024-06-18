@@ -99,20 +99,20 @@ ConvertTimestamp <- function(timestamp) {
 #' @return Invisible NULL; updates are made in-place.
 #' @export
 #' @examples
-#' UpdateConfig("NUM_THREADS", "8")
-UpdateConfig <- function(key, value) {
+#' updateConfig("NUM_THREADS", "8")
+updateConfig <- function(key, value) {
 
     if (!interactive()) {
         cat("This function can only be run in an interactive R session.\n")
         return(invisible(NULL))
         
     }
-    config_file <- Sys.getenv("HOME")  # Assume config file is in the home directory
-    config_path <- file.path(config_file, ".temp_shell_exports")
+
+    config_file <- ".temp_shell_exports"
 
     # Ensure the configuration file exists
-    if (!file.exists(config_path)) {
-        stop("Config file does not exist. Please run SetConfig() or InitSmoothR() first.")
+    if (!file.exists(config_file)) {
+        stop("Config file does not exist. Please run SetConfig() or InitSmoothR() first or navigate to the project directory.")
     }
 
     config <- readLines(config_path)
@@ -142,16 +142,10 @@ AddFat <- function(fat_value = NULL) {
         cat("This function can only be run in an interactive R session.\n")
         return(invisible(NULL))
     }
-    
-    checkDir(output_dir)
-    
-    if (output_dir != basename(getwd())){
-        stop("Something's rotten in the State of Denmark")
-    }
+        
+    config_file <- list.files(pattern = "temp_shell_exports", all.files = TRUE)
 
-    config_file <- list.files(pattern = "temp_shell_exports", all.files = TRUE)[1]
-
-    if (!file.exists(config_file)) {
+    if (!file.exists(config_file) | length(config_file) != 1) {
         stop("Config file does not exist. Please run SetConfig() or InitSmoothR() first.")
     }
 
@@ -193,17 +187,13 @@ AddFat <- function(fat_value = NULL) {
 #' @export
 ReadFromConfig <- function(key_to_check) {
     
-    if (!interactive()) {
-        return(invisible(NULL))
-    }
-
-    # current_dir <- getwd()
-
-    # checkDir(output_dir)
+    # if (!interactive()) {
+    #     return(invisible(NULL))
+    # }
     
-    config_file <- list.files(path = output_dir, pattern = "temp_shell_exports", all.files = TRUE, full.names = TRUE)[1]
+    config_file <- list.files(path = ".", pattern = "temp_shell_exports", all.files = TRUE, full.names = TRUE)
 
-    if (!file.exists(config_file) || length(config_file) > 1) {
+    if (!file.exists(config_file) | length(config_file) > 1) {
         stop("Configuration file issue: Either does not exist or multiple files found.")
     }
 
@@ -229,31 +219,45 @@ ReadFromConfig <- function(key_to_check) {
 
     return(config_values[[key_to_check]])
 
-    # setwd(current_dir)
-
 }
 
-#' Change Working Directory or Verify Current Directory
+
+#' Check and Adjust Working Directory Based on Configuration
 #'
-#' Verifies if the specified `output_dir` exists and changes the working directory to it.
-#' Throws an error if the directory does not exist or does not match the current directory.
-#' @param output_dir The target directory to validate or change to.
-checkDir <- function(output_dir) {
+#' Verifies the presence of required temp files in the current directory and ensures
+#' the output directory matches the expected configuration. Adjusts the working
+#' directory if necessary, based on the configuration.
+#'
+#' @return None; function is used for its side effects (changing directories or stopping execution).
 
-    if (!interactive()) {
-        return(invisible(NULL))
-    }
+checkDir <- function() {
 
-    current_dir <- basename(getwd())
+  # Check for specific temp files
+  temp_files <- list.files(path = ".", pattern = "^\\.temp", all.files = TRUE)
 
-    if (dir.exists(basename(output_dir))) {
-        cat("We are in correct place. \n")
-    } else if (current_dir == normalizePath(output_dir)) {
-        setwd("../")
-        cat("Changed to parrent director of the project. \n")
+  if (length(temp_files) == 0) {
+    stop("No temp files found. Please check your directory.")
+  }
+  
+  if (!any(grepl("^\\.temp_modules", temp_files)) ||
+      !any(grepl("^\\.temp_shell_exports", temp_files))) {
+    stop("Required temp files missing.")
+  }
+  
+  # Read expected output directory from configuration
+  output_dir <- ReadFromConfig("OUTPUT_DIR")
+  
+  # Validate the output directory
+  if (!dir.exists(output_dir)) {
+    if (basename(getwd()) != output_dir) {
+      stop("Directory mismatch. The output directory does not match the current working directory basename. Correct output directory not found.")
     } else {
-        stop("\033[31mDirectory mismatch or does not exist. Navigate to the correct directory.\033[0m")
+      message("Current directory is already set to the output directory.")
     }
+  } else {
+    setwd(output_dir)
+    message("Changed working directory to: ", output_dir)
+  }
 }
 
 #' Set USER_E_MAIL Environment Variable

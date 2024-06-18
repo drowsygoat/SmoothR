@@ -6,7 +6,7 @@
 #' @import lintr
 #' @return NA
 #' @export
-RunNow <- function(script_name, output_file = NULL, lint = FALSE) {
+runScript<- function(script_name, wait = FALSE, lint = FALSE) {
 
   # Validate input arguments
   if (!file.exists(script_name)) {
@@ -38,30 +38,31 @@ RunNow <- function(script_name, output_file = NULL, lint = FALSE) {
     stop("Parsing failed")
   }
   
+  output_file <- "runSmoothR.log"
+
   # Submit the script to Slurm
-  slurm_script_name <- file.path(output_dir, "runSmoothR.sh")
+  slurm_script_name <- "./runSmoothR.sh"
   shell_args <- c(script_name)
   cat("Submitting '", slurm_script_name, "' to Slurm...\n")
 
- if (is.null(output_file)) {
+ if (isTRUE(wait)) {
   
   # Running the command without redirecting errors
   tryCatch({
+    message("Script will be submitted")
     system2(slurm_script_name, args = shell_args)
-    message("Script submitted successfully.")
   }, error = function(e) {
     message("Error submitting script: ", e$message)
   })
 
 } else {
-
-  # Running the command with redirected errors
+  
+  # Running the command with redirecting
   tryCatch({
-    system2(slurm_script_name, args = shell_args, stderr = output_file, stdin = output_file, input = NULL, wait = FALSE)
+    system2(slurm_script_name, args = shell_args, stderr = output_file, stdout = output_file, input = NULL, wait = FALSE)
     message("Script submitted successfully.")
   }, error = function(e) {
     message("Error submitting script: ", e$message)
-
     })
   }
 }

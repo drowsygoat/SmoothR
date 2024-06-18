@@ -9,8 +9,9 @@
 #' @return No return value; outputs file path and contents to console.
 #' @export
 #' @examples
-#' SetConfig() # Run this in an interactive R session
-SetConfig <- function(force = F) {
+#' setConfig() # Run this in an interactive R session
+setConfig <- function(force = F) {
+
     if (!interactive()) {
         cat("This function can only be run in an interactive R session.\n")
         return(invisible(NULL))
@@ -28,27 +29,19 @@ SetConfig <- function(force = F) {
     minutes <- JOB_TIME_MINUTES %% 60
     JOB_TIME <- sprintf("%d-%02d:%02d:00", days, hours, minutes)
 
-    OUTPUT_DIR <- readline(prompt = "Enter the output directory (default current directory): ")
-    OUTPUT_DIR <- ifelse(OUTPUT_DIR == "", getwd(), OUTPUT_DIR)
-
-    if (dir.exists(OUTPUT_DIR)) {
-        if (isTRUE(force)) {
-            dir.create(OUTPUT_DIR, showWarnings = FALSE, recursive = TRUE)
-            message("\033[31mDirectory exists but 'force = TRUE'. Overwriting and continuing.\033[0m")
+    repeat {
+        OUTPUT_DIR <- readline(prompt = "Enter the output directory: ")
+        if (OUTPUT_DIR != "" && OUTPUT_DIR != getwd() && !dir.exists(OUTPUT_DIR)) {
+            dir.create(OUTPUT_DIR, recursive = TRUE)
+            message("Directory created successfully.")
+            break
+        } else if (OUTPUT_DIR == getwd()) {
+            message("\033[31mUsing the current directory is not allowed. Please choose a different directory.\033[0m")
+        } else if (dir.exists(OUTPUT_DIR)) {
+            message("\033[31mDirectory already exists. Please choose a different directory or enable 'force' option if you want to overwrite.\033[0m")
         } else {
-            repeat {
-                OUTPUT_DIR <- readline(prompt = "\033[31mDirectory exists and 'force = F'. Please choose a different name: \033[0m")
-                if (OUTPUT_DIR == "") {
-                    OUTPUT_DIR <- getwd()
-                }
-                if (!dir.exists(OUTPUT_DIR)) {
-                    dir.create(OUTPUT_DIR, recursive = TRUE)
-                    break
-                }
-            }
+            message("\033[31mInvalid input or directory path. Please try again.\033[0m")
         }
-    } else {
-        dir.create(OUTPUT_DIR, recursive = TRUE)
     }
 
     PARTITION <- readline(prompt = "Enter the partition (default 'devel'): ")
@@ -68,6 +61,7 @@ SetConfig <- function(force = F) {
     cat("Config file created/updated at:", config_path, "\n")
     cat("Config file content:\n")
     cat(readLines(config_path), sep = "\n")
-
+    
     return(OUTPUT_DIR)
+
 }

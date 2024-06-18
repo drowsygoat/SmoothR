@@ -8,9 +8,9 @@
 #' @return No return value; outputs file path and contents to console.
 #' @export
 #' @examples
-#' SetModules() # Default usage
-#' SetModules(modules = c("Python/3.8.5", "Java/1.8"), force = FALSE)
-SetModules <- function(modules = c("R/4.1.1", "R_packages/4.1.1"), force = TRUE) {
+#' setModules() # Default usage
+#' setModules(modules = c("Python/3.8.5", "Java/1.8"), force = FALSE)
+setModules <- function(modules = c("R/4.1.1", "R_packages/4.1.1"), force = TRUE) {
 
     if (!interactive()) {
         cat("This function can only be run in an interactive R session.\n")
@@ -18,9 +18,13 @@ SetModules <- function(modules = c("R/4.1.1", "R_packages/4.1.1"), force = TRUE)
     }
 
     output_dir <- ReadFromConfig("OUTPUT_DIR")
-    module_path <- file.path(output_dir, paste0(".temp_modules_", basename(output_dir)))
+    module_file <- paste0(".temp_modules_", basename(output_dir))
 
-    if (file.exists(module_path)) {
+    if (basename(getwd()) != output_dir) {
+        stop("Run initSmoother() first to create a project or navigate to the existing project's directory")
+    }
+
+    if (file.exists(module_file)) {
         if (isTRUE(force)) {
             message("Module file exists but overwriting since 'force = TRUE'.")
         } else {
@@ -29,12 +33,12 @@ SetModules <- function(modules = c("R/4.1.1", "R_packages/4.1.1"), force = TRUE)
     }
 
     if (is.null(modules)) {
-        writeLines("\n", module_path)
+        writeLines("\n", module_file)
         cat("Module file created with no modules.")
     } else {
-        writeLines(sprintf(rep("module load %s", length(modules)), modules), module_path)
-        cat("Module file created/updated at:", module_path, "\n")
+        writeLines(sprintf(rep("module load %s", length(modules)), modules), module_file)
+        cat("Module file created/updated at:", module_file, "\n")
         cat("Module file content:\n")
-        cat(readLines(module_path), sep = "\n")
+        cat(readLines(module_file), sep = "\n")
     }
 }
