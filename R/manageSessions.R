@@ -18,9 +18,6 @@ InitNow <- function(session_file_name = NULL) {
     if (is.null(session_file_name)) {
         session_file_name <- paste0(output_dir, ".RData")
     }
-    cat("OUTPUTDIR")
-    cat(output_dir)
-        cat("OUTPUTDIR")
 
     # Ensure output directory exists
     if (basename(getwd()) != output_dir) {
@@ -53,7 +50,7 @@ InitNow <- function(session_file_name = NULL) {
         script_name = args[2],
         suffix = args[3],
         timestamp = args[4],
-        threads = args[5]
+        threads = as.integer(args[5])
     )
 }
 

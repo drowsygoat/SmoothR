@@ -39,6 +39,7 @@ runScript<- function(script_name, wait = FALSE, lint = FALSE) {
   }
   
   output_file <- "runSmoothR.log"
+
   # Submit the script to Slurm
   slurm_script_name <- "./runSmoothR.sh"
   shell_args <- c(script_name)
@@ -58,7 +59,7 @@ runScript<- function(script_name, wait = FALSE, lint = FALSE) {
   
   # Running the command with redirecting
   tryCatch({
-    system2(slurm_script_name, args = shell_args, stderr = output_file, stdin = output_file, input = NULL, wait = FALSE)
+    system2(slurm_script_name, args = shell_args, stderr = output_file, stdout = output_file, input = NULL, wait = FALSE)
     message("Script submitted successfully.")
   }, error = function(e) {
     message("Error submitting script: ", e$message)

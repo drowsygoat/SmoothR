@@ -19,6 +19,9 @@ safeExecute <- function(expr, logging = FALSE, log_file = "R_console_log_file.lo
 
     if (interactive()) {
         result <- eval(expr, envir)
+        if (is.null(result)) {
+            return(invisible(NULL))
+        }
         return(result)
     }
 

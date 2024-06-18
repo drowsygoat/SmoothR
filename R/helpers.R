@@ -233,7 +233,7 @@ ReadFromConfig <- function(key_to_check) {
 checkDir <- function() {
 
   # Check for specific temp files
-  temp_files <- list.files(path = ".", pattern = "^\\.temp")
+  temp_files <- list.files(path = ".", pattern = "^\\.temp", all.files = TRUE)
 
   if (length(temp_files) == 0) {
     stop("No temp files found. Please check your directory.")
@@ -249,17 +249,14 @@ checkDir <- function() {
   
   # Validate the output directory
   if (!dir.exists(output_dir)) {
-    stop("Output directory does not exist.")
-  } else if (output_dir != basename(output_dir)) {
-    stop("Directory mismatch. The output directory does not match the current working directory basename.")
-  }
-  
-  # Adjust the working directory if necessary
-  if (normalizePath(getwd()) == normalizePath(output_dir)) {
-    cat("Current directory is already set to the output directory. \n")
+    if (basename(getwd()) != output_dir) {
+      stop("Directory mismatch. The output directory does not match the current working directory basename. Correct output directory not found.")
+    } else {
+      message("Current directory is already set to the output directory.")
+    }
   } else {
     setwd(output_dir)
-    cat("Changed working directory to: ", output_dir, "\n")
+    message("Changed working directory to: ", output_dir)
   }
 }
 

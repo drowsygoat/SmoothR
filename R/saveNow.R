@@ -21,8 +21,8 @@ saveNow <- function(session_file_name = NULL) {
     checkDir()
 
     if (!interactive()) {
-        SafeExecute({
-        session_info_path <- file.path("R_console_output", paste0("session_info_", args[5], ".txt"))
+        safeExecute({
+        session_info_path <- file.path("R_console_output", paste0("session_info_", args[5], ".txt")) # adding timestamp
         sink(session_info_path)
         print(sessioninfo::session_info())
         sink()
@@ -35,7 +35,7 @@ saveNow <- function(session_file_name = NULL) {
         session_file_name <- paste0(output_dir, ".RData")
     }
 
-    SafeExecute({
+    safeExecute({
         save.image(file = session_file_name)
         # Correct usage of checkpoint with a single string argument
         checkpoint(sprintf("Session file '%s' saved successfully.", session_file_name))
