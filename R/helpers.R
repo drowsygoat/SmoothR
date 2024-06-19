@@ -108,7 +108,11 @@ updateConfig <- function(key, value) {
         
     }
 
-    config_file <- ".temp_shell_exports"
+    config_file <- list.files(path = ".", pattern = "temp_shell_exports", all.files = TRUE, full.names = TRUE)
+
+    if (!file.exists(config_file) | length(config_file) > 1) {
+        stop("Configuration file issue: Either does not exist or multiple files found.")
+    }
 
     # Ensure the configuration file exists
     if (!file.exists(config_file)) {
@@ -143,10 +147,10 @@ AddFat <- function(fat_value = NULL) {
         return(invisible(NULL))
     }
         
-    config_file <- list.files(pattern = "temp_shell_exports", all.files = TRUE)
+    config_file <- list.files(path = ".", pattern = "temp_shell_exports", all.files = TRUE, full.names = TRUE)
 
-    if (!file.exists(config_file) | length(config_file) != 1) {
-        stop("Config file does not exist. Please run SetConfig() or InitSmoothR() first.")
+    if (!file.exists(config_file) | length(config_file) > 1) {
+        stop("Configuration file issue: Either does not exist or multiple files found.")
     }
 
     config <- readLines(config_file)
