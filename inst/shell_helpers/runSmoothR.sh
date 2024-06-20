@@ -94,9 +94,10 @@ echo -e "${color_key}Number of threads: ${color_value}$NUM_THREADS${color_reset}
 echo -e "${color_key}Job time: ${color_value}$JOB_TIME${color_reset}"
 echo -e "${color_key}Output directory: ${color_value}$OUTPUT_DIR${color_reset}"
 echo -e "${color_key}Partition: ${color_value}$PARTITION${color_reset}"
+echo -e "${color_key}Fat: ${color_value}$FAT${color_reset}"
 echo -e "${color_key}Suffix: ${color_value}$SUFFIX${color_reset}"
 echo -e "${color_key}Timestamp: ${color_value}$TIMESTAMP${color_reset}"
-echo -e "${color_key}Account: ${color_value}$USER_ACCOUNT${color_reset}"
+echo -e "${color_key}Account: ${color_value}$COMPUTE_ACCOUNT${color_reset}"
 
 # Define functions to check output file modifications and monitor job status
 function was_file_modified_last_minute() {
