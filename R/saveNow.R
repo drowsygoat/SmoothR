@@ -22,7 +22,10 @@ saveNow <- function(session_file_name = NULL) {
 
     if (!interactive()) {
         safeExecute({
+        print("Hello World")
+        [[4]]
         session_info_path <- file.path("R_console_output", paste0("session_info_", args[[4]], ".txt")) # adding timestamp
+        print("Hello World")
         sink(session_info_path)
         print(sessioninfo::session_info())
         sink()

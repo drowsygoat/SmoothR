@@ -3,7 +3,7 @@
 #' @param r_expression The R expression to run.
 #' @return NA
 #' @export
-runExpression <- function(r_expression) {
+runExpression <- function(r_expression, save = FALSE) {
   
   parse_result <- tryCatch({
     parse(text = r_expression)
@@ -19,7 +19,11 @@ runExpression <- function(r_expression) {
 
   # Set the system environment variable to indicate the operation mode
   
-  full_command <- sprintf("args <- InitNow(); %s; SaveNow()", r_expression)
+  if (isTRUE(save)) {
+      full_command <- sprintf("args <- InitNow(); %s; SaveNow()", r_expression)
+  } else {
+      full_command <- sprintf("args <- InitNow(); %s", r_expression)
+  }
 
   # Prepare the command to run the expression using R
   slurm_script_name <- "runSmoothR.sh"  # Unchanged Slurm script name

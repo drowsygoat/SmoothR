@@ -41,6 +41,10 @@ safeExecute <- function(expr, logging = FALSE, log_file = "R_console_log_file.lo
     }
 
     result <- tryCatch(eval(expr, envir = envir), error = handle_error, warning = handle_warning)
+    
+    if (is.null(result)) {
+        return(invisible(NULL))
+    }
 
     return(result)
 
