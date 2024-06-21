@@ -2,19 +2,19 @@
 #'
 #' @param NUM_THREADS New number of threads to set.
 #' @export
-UpdateNumThreads <- function(NUM_THREADS) {
+updateNumThreads <- function(NUM_THREADS) {
     if (!interactive()) {
         cat("This function can only be run in an interactive R session.\n")
         return(invisible(NULL))
     }
-    UpdateConfig("NUM_THREADS", NUM_THREADS)
+    updateConfig("NUM_THREADS", NUM_THREADS)
 }
 
 #' Update Job Time
 #'
 #' @param JOB_TIME_MINUTES New job time to set in minutes.
 #' @export
-UpdateJobTime <- function(JOB_TIME_MINUTES) {
+updateJobTime <- function(JOB_TIME_MINUTES) {
     if (!interactive()) {
         cat("This function can only be run in an interactive R session.\n")
         return(invisible(NULL))
@@ -24,43 +24,43 @@ UpdateJobTime <- function(JOB_TIME_MINUTES) {
     hours <- hours %% 24
     minutes <- JOB_TIME_MINUTES %% 60
     JOB_TIME <- sprintf("%d-%02d:%02d:00", days, hours, minutes)
-    UpdateConfig("JOB_TIME", JOB_TIME)
+    updateConfig("JOB_TIME", JOB_TIME)
 }
 
 #' Update Output Directory
 #'
 #' @param OUTPUT_DIR New output directory to set.
 #' @export
-UpdateOutputDir <- function(OUTPUT_DIR) {
+updateOutputDir <- function(OUTPUT_DIR) {
     if (!interactive()) {
         cat("This function can only be run in an interactive R session.\n")
         return(invisible(NULL))
     }
-    UpdateConfig("OUTPUT_DIR", OUTPUT_DIR)
+    updateConfig("OUTPUT_DIR", OUTPUT_DIR)
 }
 
 #' Update Job Partition
 #'
 #' @param PARTITION New partition to set.
 #' @export
-UpdatePartition <- function(PARTITION) {
+updatePartition <- function(PARTITION) {
     if (!interactive()) {
         cat("This function can only be run in an interactive R session.\n")
         return(invisible(NULL))
     }
-    UpdateConfig("PARTITION", PARTITION)
+    updateConfig("PARTITION", PARTITION)
 }
 
 #' Update File Suffix
 #'
 #' @param SUFFIX New suffix for the files to set.
 #' @export
-UpdateSuffix <- function(SUFFIX) {
+updateSuffix <- function(SUFFIX) {
     if (!interactive()) {
         cat("This function can only be run in an interactive R session.\n")
         return(invisible(NULL))
     }
-    UpdateConfig("SUFFIX", SUFFIX)
+    updateConfig("SUFFIX", SUFFIX)
 }
 
 #' Convert Timestamp to Human-Readable Format
@@ -75,7 +75,7 @@ UpdateSuffix <- function(SUFFIX) {
 #' convert_timestamp("20240606_202103")
 #' @importFrom lubridate ymd_hms
 #' @noRd
-ConvertTimestamp <- function(timestamp) {
+convertTimestamp <- function(timestamp) {
 
     if (!grepl("^\\d{8}_\\d{6}$", timestamp)) {
         stop("Invalid timestamp format. Expected 'YYYYMMDD_HHMMSS'.")
@@ -105,7 +105,6 @@ updateConfig <- function(key, value) {
     if (!interactive()) {
         cat("This function can only be run in an interactive R session.\n")
         return(invisible(NULL))
-        
     }
 
     config_file <- list.files(path = ".", pattern = "temp_shell_exports", all.files = TRUE, full.names = TRUE)
@@ -141,7 +140,7 @@ updateConfig <- function(key, value) {
 #'
 #' @param fat_value Optional character indicating the FAT setting ('T', 'F', 't', 'f'); default NULL.
 #' @export
-AddFat <- function(fat_value = NULL) {
+addFat <- function(fat_value = NULL) {
     if (!interactive()) {
         cat("This function can only be run in an interactive R session.\n")
         return(invisible(NULL))

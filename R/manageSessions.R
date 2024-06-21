@@ -45,14 +45,16 @@ InitNow <- function(session_file_name = NULL) {
         cat(sprintf("Arg %d: %s\n", i, args[i]))
     }
 
-    list(
-        output_dir = args[1],
-        script_name = args[2],
-        suffix = args[3],
-        timestamp = args[4],
-        threads = as.integer(args[5])
-    )
-}
+        return(
+            list(
+            output_dir = as.character(args[1]),
+            script_name = as.character(args[2]),
+            suffix = as.character(args[3]),
+            timestamp = as.character(args[4]),
+            threads = as.integer(args[5])
+            )
+        )
+    }
 
 
 #' Quit R Session when not Interactive

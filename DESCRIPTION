@@ -1,9 +1,9 @@
 Package: SmoothR
-Title: Manage R Sessions while using SLURM repetitively
+Title: A Simple R Project Manager
 Version: 0.0.0.9000
 Authors@R: c(
     person("Lech", "Kaczmarczyk", email = "lecka@liu.se", role = c("aut", "cre")))
-Description: Manage R Sessions while using SLURM repetitively
+Description: SmoothR is an R package specifically designed to streamline the setup and management of Slurm job environments. It creates a project-specific directory, housing its own SLURM configuration in a separate directory, thus facilitating the easy configuration of environment variables, session management, and integration with the Slurm job submission system. Essentially, SmoothR acts as an organizer for R projects within a remote compute cluster.
 License: GPL-3
 Imports:
     dplyr,

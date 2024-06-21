@@ -22,20 +22,20 @@ saveNow <- function(session_file_name = NULL) {
 
     if (!interactive()) {
         safeExecute({
-        print("Hello World")
-        args[[4]]
-        session_info_path <- file.path("R_console_output", paste0("session_info_", args[[4]], ".txt")) # adding timestamp
-        print("Hello World")
-        sink(session_info_path)
-        print(sessioninfo::session_info())
-        sink()
-        message("Session info logged in '", session_info_path, "'.")
+            print("Hello World")
+            session_info_path <- file.path("R_console_output", paste0("session_info_", commandLineArgs[[4]], ".txt")) # adding timestamp
+            print("Hello World")
+            sink(session_info_path)
+            print(sessioninfo::session_info())
+            sink()
+            message("Session info logged in '", session_info_path, "'.")
         })
     }
 
     if (is.null(session_file_name)) {
         output_dir <- ReadFromConfig("OUTPUT_DIR")
         session_file_name <- paste0(output_dir, ".RData")
+        checkpoint(paste0("Session file name not provided. Using ' ", output_dir, ".RData '"))
     }
 
     safeExecute({
