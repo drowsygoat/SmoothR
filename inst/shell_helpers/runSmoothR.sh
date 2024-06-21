@@ -84,8 +84,8 @@ shift 1
 ARGUMENTS="$@"
 
 # Define color settings using tput
-color_key=$(tput setaf 4)   # Blue color for keys
-color_value=$(tput setaf 2) # Green color for values
+color_key=$(tput setaf 6)   # Blue color for keys
+color_value=$(tput setaf 8) # Green color for values
 color_reset=$(tput sgr0)    # Reset to default terminal color
 
 # Display settings
@@ -235,7 +235,7 @@ export module_file
 JOB_ID=$(sbatch --parsable "$SBATCH_SCRIPT" || exit 1)
 start=$(date +%s)
 
-tput setaf 5
+tput setaf 10
 echo -e "Job ID $JOB_ID submitted at $TIMESTAMP.\nPress 'c' at any time to cancel.\nPress 'q' at any time to stop monitoring.\nCancelling will discard the log files."
 tput sgr 0
 
@@ -243,9 +243,9 @@ read -t 5 -n 1 input
 if [[ $input = "c" ]]; then
     # User pressed 'c', cancel the job using scancel
     scancel $JOB_ID
-    # rm -rf slurm_reports/%x_%j_${TIMESTAMP}.out
-    # rm -rf slurm_reports/%x_%j_${TIMESTAMP}.err
-    # rm -rf R_console_output/R_output_${TIMESTAMP}.log
+    rm -rf slurm_reports/%x_%j_${TIMESTAMP}.out
+    rm -rf slurm_reports/%x_%j_${TIMESTAMP}.err
+    rm -rf R_console_output/R_output_${TIMESTAMP}.log
     find . -type f | grep -E "$TIMESTAMP" | while read -r file; do
         echo "Removing files"
         rm -rf "$file"
@@ -255,6 +255,13 @@ if [[ $input = "c" ]]; then
     echo "Operation canceled by the user."
     tput sgr 0
     exit 1
+elif [[ $input = "q" ]]; then
+    # User pressed 'q', exit with status 0
+    tput setaf 1
+    echo ""
+    echo "Monitoring stopped by the user."
+    tput sgr 0
+    exit 0
 else
     unset input
 fi

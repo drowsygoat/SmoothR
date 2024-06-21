@@ -4,7 +4,7 @@
 \alias{runExpression}
 \title{Run an R expression and submit it to Slurm for execution.}
 \usage{
-runExpression(r_expression)
+runExpression(r_expression, save = FALSE)
 }
 \arguments{
 \item{r_expression}{The R expression to run.}
