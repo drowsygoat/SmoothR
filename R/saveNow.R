@@ -20,6 +20,8 @@ saveNow <- function(session_file_name = NULL) {
 
     checkDir()
 
+    commandLineArgs <- commandArgs(trailingOnly = TRUE)
+    
     if (!interactive()) {
         safeExecute({
             print("Hello World")
