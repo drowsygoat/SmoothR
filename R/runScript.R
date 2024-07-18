@@ -45,11 +45,11 @@ runScript<- function(script_name, wait = FALSE, lint = FALSE) {
   shell_args <- c(script_name)
   cat("Submitting '", slurm_script_name, "' to Slurm...\n")
 
- if (isTRUE(wait)) {
+ if (wait) {
   
   # Running the command without redirecting errors
   tryCatch({
-    message("Script will be submitted")
+    message("Submitting script. Check log file in case of problems.")
     system2(slurm_script_name, args = shell_args)
   }, error = function(e) {
     message("Error submitting script: ", e$message)
@@ -59,8 +59,8 @@ runScript<- function(script_name, wait = FALSE, lint = FALSE) {
   
   # Running the command with redirecting
   tryCatch({
+    message("Submitting script. Check log file in case of problems.")
     system2(slurm_script_name, args = shell_args, stderr = output_file, stdout = output_file, input = NULL, wait = FALSE)
-    message("Script submitted successfully.")
   }, error = function(e) {
     message("Error submitting script: ", e$message)
     })

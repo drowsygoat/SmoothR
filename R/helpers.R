@@ -118,7 +118,7 @@ updateConfig <- function(key, value) {
         stop("Config file does not exist. Please run SetConfig() or InitSmoothR() first or navigate to the project directory.")
     }
 
-    config <- readLines(config_path)
+    config <- readLines(config_file)
     key_pattern <- sprintf("^export %s=", key)
     has_key <- grepl(key_pattern, config)
 

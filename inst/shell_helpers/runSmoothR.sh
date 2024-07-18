@@ -152,12 +152,12 @@ function is_job_active() {
     return $(( active_jobs == 0 ))
 }
 
-# # Check and create output directory
-# if [ -d "$OUTPUT_DIR" ]; then
-#     tput setaf 1
-#     echo -e "WARNING: The directory $OUTPUT_DIR already exists files may be overwritten."
-#     tput sgr 0
-# fi
+# Check and create output directory
+if [ -d "$OUTPUT_DIR" ]; then
+    tput setaf 1
+    echo -e "WARNING: The directory $OUTPUT_DIR already exists files may be overwritten."
+    tput sgr 0
+fi
 
 # mkdir -p "${OUTPUT_DIR}"
 mkdir -p "slurm_reports"
@@ -183,7 +183,7 @@ if [[ $FAT == "F" ]]; then
 
 source \$module_file
 
-./\$R_SCRIPT \$OUTPUT_DIR \$R_SCRIPT \$SUFFIX \$TIMESTAMP \$NUM_THREADS \$ARGUMENTS 2>&1 | tee R_console_output/R_output_\$TIMESTAMP.log >> R_console_output/R_output_cumulative.log
+./\$R_SCRIPT \$OUTPUT_DIR \$R_SCRIPT \$SUFFIX \$TIMESTAMP \$NUM_THREADS \$ARGUMENTS 2>&1 | tee R_console_output/R_out_\$TIMESTAMP.log >> R_console_output/R_output_cumulative.log
 EOF
 
 else
@@ -203,7 +203,7 @@ else
 
 source \$module_file
 
-./\$R_SCRIPT \$OUTPUT_DIR \$R_SCRIPT \$SUFFIX \$TIMESTAMP \$NUM_THREADS \$ARGUMENTS 2>&1 | tee R_console_output/R_out_\$R_SCRIPT_\$TIMESTAMP.log >> R_console_output/R_sink.log # sink gets cumulative output, so it gets messy then mutiple runs run in the same time
+./\$R_SCRIPT \$OUTPUT_DIR \$R_SCRIPT \$SUFFIX \$TIMESTAMP \$NUM_THREADS \$ARGUMENTS 2>&1 | tee R_console_output/R_out_\$TIMESTAMP.log >> R_console_output/R_sink.log # sink gets cumulative output, so it gets messy then mutiple runs run in the same time
 EOF
 
 fi
