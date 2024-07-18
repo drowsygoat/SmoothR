@@ -33,6 +33,35 @@
 #'   resultsDir = "path/to/results"
 #' )
 
+
+matrixEQTLwrapperMC <- function(feature_locations_path = NULL, feature_data_path = NULL, snpFilePath = NULL, covFilePath, snpLocPath = NULL, group_name, resultsDir = getwd(), cisDist = 1e6, pvOutputThreshold = 1e-5, pvOutputThresholdCis = 1e-4, useModel = "linear", minPvByGeneSnp = TRUE, noFDRsaveMemory = FALSE, pvalueHist = "qqplot", SNPsInChunks = NULL, prefix = NULL) {
+
+    iteration_df <- expand.grid(
+        DATA = list.files(feature_data_path, pattern = "chunk_[0-9]+_input"),
+        SNP = list.files(snpFilePath, pattern = "chunk_[0-9]+_SNP"),
+        stringsAsFactors = FALSE
+    )
+
+    chunk_snp <- grep_o(iteration_df[["SNP"]], "chunk_[0-9]+")
+    chunk_feature <- grep_o(iteration_df[["DATA"]], "chunk_[0-9]+")
+
+    iteration_df$SNP_LOC <- sapply(chunk_snp, function(x) {
+        list.files(snpLocPath, pattern = paste0(x, "_loc"))
+    }, USE.NAMES = FALSE)
+
+    iteration_df$DATA_LOC <- sapply(chunk_feature, function(x) {
+        list.files(feature_locations_path, pattern = paste0(x, "_loc"))
+    }, USE.NAMES = FALSE)
+
+
+    lapply(1:nrow(iteration_df), function(x) {
+
+        matrixEQTLwrapper(feature_locations_path = iteration_df[[["DATA_LOC"]][x], feature_data_path = iteration_df[[["DATA"]][x], snpFilePath = iteration_df[[["SNP"]][x], covFilePath = covFilePath, snpLocPath = iteration_df[[["SNP_LOC"]][x], group_name = group_name, resultsDir = resultsDir, cisDist = cisDist, pvOutputThreshold = pvOutputThreshold, pvOutputThresholdCis = pvOutputThresholdCis, useModel = useModel, minPvByGeneSnp = minPvByGeneSnp, noFDRsaveMemory = noFDRsaveMemory, pvalueHist = pvalueHist, SNPsInChunks = SNPsInChunks, prefix = prefix
+
+        return(invisible())
+    })
+}
+
 matrixEQTLwrapper <- function(feature_locations_path = NULL, feature_data_path = NULL, snpFilePath = NULL, covFilePath, snpLocPath = NULL, group_name, resultsDir = getwd(), cisDist = 1e6, pvOutputThreshold = 1e-5, pvOutputThresholdCis = 1e-4, useModel = "linear", minPvByGeneSnp = TRUE, noFDRsaveMemory = FALSE, pvalueHist = "qqplot", SNPsInChunks = NULL, prefix = NULL) {
 
     # Determine the model based on the input
@@ -53,7 +82,7 @@ matrixEQTLwrapper <- function(feature_locations_path = NULL, feature_data_path =
     # grep_o is from SmoothR
     chunk_snp <- grep_o(snpFilePath, "chunk_[0-9]+")
     chunk_feature <- grep_o(feature_data_path, "chunk_[0-9]+")
-    
+
     if (is.null(prefix)) {
         prefix <- paste(useModel, cisDist, chunk_snp, chunk_feature, sep = "_")
     } else {
@@ -88,7 +117,6 @@ matrixEQTLwrapper <- function(feature_locations_path = NULL, feature_data_path =
     SNPs_sliced$fileSkipColumns <- 1
     SNPs_sliced$fileSliceSize <- 2000
     SNPs_sliced$LoadFile(snpFilePath)
-
 
 
     if (COV_sliced$nRows() > feature_data$nCols()) {
