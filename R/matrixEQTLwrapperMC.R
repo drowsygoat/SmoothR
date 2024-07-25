@@ -34,11 +34,33 @@
 #' )
 
 
-matrixEQTLwrapperMC <- function(feature_locations_path = NULL, feature_data_path = NULL, snpFilePath = NULL, covFilePath, snpLocPath = NULL, group_name, resultsDir = getwd(), cisDist = 1e6, pvOutputThreshold = 1e-5, pvOutputThresholdCis = 1e-4, useModel = "linear", minPvByGeneSnp = TRUE, noFDRsaveMemory = FALSE, pvalueHist = "qqplot", SNPsInChunks = NULL, prefix = NULL) {
+matrixEQTLwrapperMC <- function(
+    feature_locations_path = NULL, 
+    feature_data_path = NULL, 
+    snpFilePath = NULL,
+    snpLocPath = NULL,
+    covFilePath, 
+    group_name, 
+    resultsDir = getwd(), 
+    cisDist = 1e6, 
+    pvOutputThreshold = 1e-5, 
+    pvOutputThresholdCis = 1e-4, 
+    useModel = "linear", 
+    minPvByGeneSnp = TRUE, 
+    noFDRsaveMemory = FALSE, 
+    pvalueHist = NULL, 
+    SNPsInChunks = NULL, 
+    prefix = NULL, 
+    threads = NULL) {
+
+    check_directories(feature_locations_path, feature_data_path, snpFilePath, snpLocPath)
+
+    DATA = list.files(file.path(feature_data_path, group_name), pattern = "chunk_[0-9]+_input", full.names = TRUE)
+    SNP = list.files(snpFilePath, pattern = "chunk_[0-9]+_SNP", full.names = TRUE)
 
     iteration_df <- expand.grid(
-        DATA = list.files(feature_data_path, pattern = "chunk_[0-9]+_input"),
-        SNP = list.files(snpFilePath, pattern = "chunk_[0-9]+_SNP"),
+        DATA = DATA,
+        SNP = SNP,
         stringsAsFactors = FALSE
     )
 
@@ -46,24 +68,55 @@ matrixEQTLwrapperMC <- function(feature_locations_path = NULL, feature_data_path
     chunk_feature <- grep_o(iteration_df[["DATA"]], "chunk_[0-9]+")
 
     iteration_df$SNP_LOC <- sapply(chunk_snp, function(x) {
-        list.files(snpLocPath, pattern = paste0(x, "_loc"))
+        list.files(snpLocPath, pattern = paste0(x, "_loc"), full.names = TRUE)
     }, USE.NAMES = FALSE)
 
     iteration_df$DATA_LOC <- sapply(chunk_feature, function(x) {
-        list.files(feature_locations_path, pattern = paste0(x, "_loc"))
+        list.files(feature_locations_path, pattern = paste0(x, "_loc"), full.names = TRUE)
     }, USE.NAMES = FALSE)
+ 
+    if (is.null(threads)) {
+        num_cores <- detectCores() / 2  # Using half of available cores
+    } else {
+        num_cores <- threads
+    }
 
+    print(iteration_df) 
 
-    lapply(1:nrow(iteration_df), function(x) {
+    print(paste("Processors:", detectCores())) 
+    print(paste("Threads:", num_cores)) 
 
-        matrixEQTLwrapper(feature_locations_path = iteration_df[[["DATA_LOC"]][x], feature_data_path = iteration_df[[["DATA"]][x], snpFilePath = iteration_df[[["SNP"]][x], covFilePath = covFilePath, snpLocPath = iteration_df[[["SNP_LOC"]][x], group_name = group_name, resultsDir = resultsDir, cisDist = cisDist, pvOutputThreshold = pvOutputThreshold, pvOutputThresholdCis = pvOutputThresholdCis, useModel = useModel, minPvByGeneSnp = minPvByGeneSnp, noFDRsaveMemory = noFDRsaveMemory, pvalueHist = pvalueHist, SNPsInChunks = SNPsInChunks, prefix = prefix
+    mclapply(1:nrow(iteration_df), function(x) {
 
-        return(invisible())
-    })
+        matrixEQTLwrapper(
+            feature_locations_path = iteration_df[["DATA_LOC"]][x], feature_data_path = iteration_df[["DATA"]][x], 
+            snpFilePath = iteration_df[["SNP"]][x], 
+            covFilePath = covFilePath, 
+            snpLocPath = iteration_df[["SNP_LOC"]][x],
+            group_name = group_name,
+            resultsDir = resultsDir, 
+            cisDist = cisDist, 
+            pvOutputThreshold = pvOutputThreshold, 
+            pvOutputThresholdCis = pvOutputThresholdCis, 
+            useModel = useModel,
+            minPvByGeneSnp = minPvByGeneSnp, 
+            noFDRsaveMemory = noFDRsaveMemory, 
+            SNPsInChunks = SNPsInChunks, 
+            prefix = prefix,
+            pvalueHist = pvalueHist)
+
+        return(invisible(NULL))
+
+     }, mc.preschedule = FALSE, mc.cores = num_cores)
 }
 
-matrixEQTLwrapper <- function(feature_locations_path = NULL, feature_data_path = NULL, snpFilePath = NULL, covFilePath, snpLocPath = NULL, group_name, resultsDir = getwd(), cisDist = 1e6, pvOutputThreshold = 1e-5, pvOutputThresholdCis = 1e-4, useModel = "linear", minPvByGeneSnp = TRUE, noFDRsaveMemory = FALSE, pvalueHist = "qqplot", SNPsInChunks = NULL, prefix = NULL) {
+matrixEQTLwrapper <- function(feature_locations_path = NULL, feature_data_path = NULL, snpFilePath = NULL, covFilePath, snpLocPath = NULL, group_name, resultsDir = getwd(), cisDist = 1e6, pvOutputThreshold = 1e-5, pvOutputThresholdCis = 1e-4, useModel = "linear", minPvByGeneSnp = TRUE, noFDRsaveMemory = FALSE, SNPsInChunks = NULL, prefix = NULL, pvalueHist = NULL) {
+    print("1")
 
+    chunk_snp <- grep_o(snpFilePath, "chunk_[0-9]+")
+    chunk_feature <- grep_o(feature_data_path, "chunk_[0-9]+")
+
+    print("2")
     # Determine the model based on the input
     if (useModel == "linear") {
         useModel <- modelLINEAR
@@ -75,29 +128,54 @@ matrixEQTLwrapper <- function(feature_locations_path = NULL, feature_data_path =
         stop("'useModel' must be one of 'linear', 'cross', or 'anova'")
     }
 
-    subdir_name <- group_name # dir variable from fork
-
-    group_name <- gsub("group_|_results", "", group_name)
-
-    # grep_o is from SmoothR
-    chunk_snp <- grep_o(snpFilePath, "chunk_[0-9]+")
-    chunk_feature <- grep_o(feature_data_path, "chunk_[0-9]+")
-
     if (is.null(prefix)) {
         prefix <- paste(useModel, cisDist, chunk_snp, chunk_feature, sep = "_")
     } else {
         prefix <- paste(useModel, cisDist, chunk_snp, chunk_feature, prefix, sep = "_")
     }
+    
+    subdir_name <- group_name # dir variable from fork
 
-#############    
-# LOAD DATA #
-#############
+    group_name <- gsub("group_|_results", "", group_name)
+
+    ################    
+    # Output paths #
+    ################
+
+    output_file_name_trans <- file.path(resultsDir, subdir_name, paste(subdir_name, tolower(prefix), "eQTL_trans.txt", sep = "_"))
+    output_file_name_cis <- file.path(resultsDir, subdir_name, paste(subdir_name, tolower(prefix), "eQTL_cis.txt", sep = "_"))
+
+    gzipped_output_file_name_trans <- paste0(output_file_name_trans, ".gz")
+    gzipped_output_file_name_cis <- paste0(output_file_name_cis, ".gz")
+
+    print("gzipped_output_file_name_trans")
+    print(gzipped_output_file_name_trans)
+
+    if (file.exists(gzipped_output_file_name_trans)) {
+        message("Result already exists: ", gzipped_output_file_name_trans)
+        return(invisible(NULL))
+    }
+
+    ntests_file_name <- file.path(resultsDir, subdir_name, paste(subdir_name, tolower(prefix), "ntests.txt", sep = "_"))
+    result_path <- file.path(resultsDir, subdir_name, paste(subdir_name, tolower(prefix), "results_MEQTL.rds", sep = "_")) 
+    log_path <- file.path(resultsDir, subdir_name, paste(subdir_name, tolower(prefix), "MEQTL_runtime_log.txt", sep = "_"))
+
+    log_con <- file(log_path, open = "a")
+    on.exit(close(log_con))
+
+        #############    
+    # LOAD DATA #
+    #############
+
+    print("A")
 
     print(feature_locations_path)
     feature_locations <- readRDS(feature_locations_path)
+    print("B")
 
     print(feature_data_path)
     feature_data <- readRDS(feature_data_path)
+    print("C")
 
     print(snpLocPath)
     snp_locations <- read.table(snpLocPath, header = TRUE)
@@ -127,29 +205,17 @@ matrixEQTLwrapper <- function(feature_locations_path = NULL, feature_data_path =
         stop("More samples in features data than in SNP data")
     }
     
-    print("1")
-
-    if (!check_complete_match(SNPs_sliced$columnNames, feature_data$columnNames)) {
-
-        print("2")
-
+    if (!check_complete_match(SNPs_sliced$columnNames,feature_data$columnNames)) {
         message("Reordering/subsetting SNP and COV data based on samples")
         sample_to_keep_from_genomic_data <- sort(which(sapply(SNPs_sliced$columnNames, check_match, group_name_vector = feature_data$columnNames)))
         SNPs_sliced$ColumnSubsample(sample_to_keep_from_genomic_data)
         COV_sliced$ColumnSubsample(sample_to_keep_from_genomic_data)
     }
 
-    # Output paths
-    output_file_name_trans <- file.path(resultsDir, subdir_name, paste(subdir_name, tolower(prefix), "eQTL_trans.txt", sep = "_"))
-    output_file_name_cis <- file.path(resultsDir, subdir_name, paste(subdir_name, tolower(prefix), "eQTL_cis.txt", sep = "_"))
-    result_path <- file.path(resultsDir, subdir_name, paste(subdir_name, tolower(prefix), "results_MEQTL.rds", sep = "_")) 
-    log_path <- file.path(resultsDir, subdir_name, paste(subdir_name, tolower(prefix), "MEQTL_runtime_log.txt", sep = "_"))
+        start_time <- Sys.time()
+        writeLines(paste(Sys.time(), "Started logging...:"), log_con)
 
-    log_con <- file(log_path, open = "a")
-    on.exit(close(log_con))
-
-    start_time <- Sys.time()
-    writeLines(paste(Sys.time(), "Started logging...:"), log_con)
+        print("3")
 
         tryCatch(
             withCallingHandlers({
@@ -172,10 +238,25 @@ matrixEQTLwrapper <- function(feature_locations_path = NULL, feature_data_path =
                     noFDRsaveMemory = noFDRsaveMemory,
                     verbose = TRUE
                 )
+
+                rm(SNPs_sliced)
+                rm(feature_data)
+                rm(COV_sliced)
+                rm(snp_locations)
+                rm(feature_locations)
+
+                gc()
+
                 # Log the results
                 end_time <- Sys.time()
                 duration <- end_time - start_time
-                message(sprintf("MatrixEQTL completed in %s seconds.", duration), file = log_con)
+
+                message(sprintf("MatrixEQTL completed in %s seconds.", duration))
+
+                write.table(data.frame(result$all$ntests, result$trans$ntests,result$cis$ntests), file = ntests_file_name, row.names = F, col.names = F)
+
+                result$trans$eqtls <- NULL
+                result$cis$eqtls <- NULL
 
                 result <- list(result=result,
                             feature_data_path = feature_data_path,
@@ -187,6 +268,7 @@ matrixEQTLwrapper <- function(feature_locations_path = NULL, feature_data_path =
                 # Save results 
                 saveRDS(result, file = result_path)
 
+                writeLines(paste(Sys.time(), "Data saved..."), log_con)
                 print("Data saved...")
 
                 # compress lists
@@ -194,9 +276,12 @@ matrixEQTLwrapper <- function(feature_locations_path = NULL, feature_data_path =
 
                 gzip(output_file_name_trans, destname =  paste0(output_file_name_trans, ".gz"), remove = TRUE)
                 
+                writeLines(paste(Sys.time(), "Data compressed..."), log_con)
                 print("Data compressed...")
 
-            return(TRUE)
+                writeLines(paste(Sys.time(), "Finished logging...:"), log_con)
+
+            return(invisible(NULL))
 
             }, warning = function(w) {
                 writeLines(paste(Sys.time(), "Warning:", w$message), log_con)
@@ -235,4 +320,18 @@ check_match <- function(sample_name, group_name_vector) {
 #' @keywords internal
 check_complete_match <- function(sample_name_vector, group_name_vector) {
    all(sapply(sample_name_vector, check_match, group_name_vector = group_name_vector))
+}
+
+check_directories <- function(...) {
+  paths <- list(...)
+  
+  if (length(paths) == 0) {
+    stop("No paths provided.")
+  }
+  
+  for (path in paths) {
+    if (!dir.exists(path)) {
+      stop(paste("Directory does not exist:", path))
+    }
+  }
 }
