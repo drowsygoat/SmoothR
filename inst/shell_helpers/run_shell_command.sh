@@ -2,35 +2,31 @@
 
 # Script to setup and submit a SLURM job with custom job settings and user input.
 
-function print_job_status() {
-    current_status=$(sacct --brief --jobs $JOB_ID | awk -v job_id="$JOB_ID" '$1 == job_id {print $1, $2}')
-    if [[ "$last_status" != "$current_status" ]]; then
-        echo ""
-        echo -n "Monitoring job status for Job ID: $current_status"
-        last_status="$current_status"
-    else
-        echo -n "."
-    fi
-}
+source /cfs/klemming/projects/snic/sllstore2017078/lech/RR/scAnalysis/SmoothR/inst/shell_helpers/helpers_shell.sh
 
-function is_job_active() {
-    local active_jobs=$(sacct --jobs $JOB_ID | grep -E "RUNNING|PENDING" | wc -l)
-    return $(( active_jobs == 0 ))
-}
-
+# User email and compute account settings
+COMPUTE_ACCOUNT=${COMPUTE_ACCOUNT}  # Compute account variable
 
 # Capture the current timestamp
+# TIMESTAMP=$(TIMESTAMP:-$(date +%Y%m%d_%H%M%S))
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
 # Clear any previous settings for these variables
-unset NUM_THREADS
+unset TASKS
 unset JOB_TIME
 unset PARTITION
+unset TASKS
+unset CPUS
+unset NODES
+unset DRY_RUN
 
 # Default values for job settings
-NUM_THREADS="1"  # Default to 1 thread unless specified
-PARTITION="devel"  # Default partition is 'devel'
-DRY_RUN=0
+
+NODES="1"
+CPUS="1"
+TASKS="1" 
+PARTITION="shared"
+INTERACTIVE=0
 
 # Add this at the beginning of your getopts loop
 if [ $# -eq 0 ]; then
@@ -61,26 +57,31 @@ function display_help() {
 }
 
 # Parse command-line options using getopts
-while getopts "J:n:t:p:hd" opt; do
+while getopts "J:n:t:p:N:ic:d:" opt; do
   case ${opt} in
-    h )
-      display_help
-      exit 0
-      ;;
     J )
-      JOB_NAME=${OPTARG}  # Job name specified with -J option
+      JOB_NAME=${OPTARG} 
       ;;
     n )
-      NUM_THREADS=${OPTARG}  # Number of threads specified with -n option
+      TASKS=${OPTARG}  
       ;;
     t )
-      JOB_TIME=${OPTARG}  # Job time duration specified with -t option
+      JOB_TIME=${OPTARG}  
       ;;
     p )
-      PARTITION=${OPTARG}  # Partition specified with -p option
+      PARTITION=${OPTARG}  
       ;;
-    d)
-      DRY_RUN=1  # Dry run mode, no arguments needed
+    N )
+      NODES=${OPTARG}  
+      ;;
+    i )
+      INTERACTIVE=1  
+      ;;
+    c )
+      CPUS=${OPTARG}  
+      ;;
+    d )
+      DRY_RUN=${OPTARG}  
       ;;
     \? )
       echo "Invalid option: $OPTARG" 1>&2
@@ -103,41 +104,48 @@ ARGUMENTS="$@"
 JOB_NAME=${JOB_NAME:-$(echo $ARGUMENTS | awk '{print $1}')}
 
 # Set default job time based on the partition
-if [[ $PARTITION =~ (core|node|shared|long|main) ]]; then
-    JOB_TIME=${JOB_TIME:-03:00:00}  # Longer default time for 'core' or 'node'
+if [[ $PARTITION =~ (core|node|shared|long|main|memory|devel) ]]; then
+    JOB_TIME=${JOB_TIME:-23:59:00}
 else 
-    JOB_TIME=${JOB_TIME:-00:10:00}  # Shorter default time for devel
+    JOB_TIME=${JOB_TIME:-00:10:00} 
 fi
-
-# Print the job parameters for confirmation
-echo "Job name: $JOB_NAME"
-echo "Threads: $NUM_THREADS"
-echo "Time: $JOB_TIME"
-echo "Partition: $PARTITION"
-echo "Command: $ARGUMENTS"
-
-# User email and compute account settings
-USER_E_MAIL='lecka48$liu.se'  # Placeholder email
-COMPUTE_ACCOUNT=${COMPUTE_ACCOUNT}  # Compute account variable
 
 # Color settings for output using tput
 color_key=$(tput setaf 4)   # Blue color for keys
-color_value=$(tput setaf 2) # Green color for values
+color_value=$(tput setaf 6) # Green color for values
 color_reset=$(tput sgr0)    # Reset to default terminal color
 
 # Display settings
 echo -e "Here are the current settings:"
 echo -e "${color_key}Job name: ${color_value}$JOB_NAME${color_reset}"
-echo -e "${color_key}Number of threads: ${color_value}$NUM_THREADS${color_reset}"
+echo -e "${color_key}Number of tasks: ${color_value}$TASKS${color_reset}"
+echo -e "${color_key}Number of cpus: ${color_value}$CPUS${color_reset}"
+echo -e "${color_key}Number of nodes: ${color_value}$NODES${color_reset}"
 echo -e "${color_key}Job time: ${color_value}$JOB_TIME${color_reset}"
 echo -e "${color_key}Partition: ${color_value}$PARTITION${color_reset}"
+echo -e "${color_key}E-mail: ${color_value}$USER_E_MAIL${color_reset}"
 echo -e "${color_key}Account: ${color_value}$COMPUTE_ACCOUNT${color_reset}"
+echo -e "${color_key}Dry run: ${color_value}$DRY_RUN${color_reset}"
 
-# Prepare the directory and SLURM script for the job
-mkdir -p ${SLURM_HISTORY}/${JOB_NAME}_${TIMESTAMP}
 SBATCH_SCRIPT="${SLURM_HISTORY}/${JOB_NAME}_${TIMESTAMP}/${JOB_NAME}_${TIMESTAMP}.sh"
 
 # Create the SLURM job script with the specified parameters
+if [[ $DRY_RUN == "dry" ]]; then
+  echo -e "This would be run:" 
+  echo -e "$ARGUMENTS" 
+  exit 0
+elif [[ $DRY_RUN == "with_eval" ]]; then
+  echo -e "Evaluating:" 
+  echo -e "$ARGUMENTS"
+  eval "$ARGUMENTS"
+  echo -e "Finished."
+  exit 0
+fi
+
+# Prepare the directory and SLURM script for the job
+mkdir -p ${SLURM_HISTORY}/${JOB_NAME}_${TIMESTAMP}
+
+# creating script file
 cat <<EOF > "$SBATCH_SCRIPT"
 #!/bin/bash -eu
 #SBATCH -A ${COMPUTE_ACCOUNT}
@@ -145,38 +153,55 @@ cat <<EOF > "$SBATCH_SCRIPT"
 #SBATCH -o ${SLURM_HISTORY}/%x_${TIMESTAMP}/%x_%j_${TIMESTAMP}.out
 #SBATCH -t ${JOB_TIME}
 #SBATCH -p ${PARTITION}
-#SBATCH -n ${NUM_THREADS}
-#SBATCH --mail-user=${USER_E_MAIL}
-#SBATCH --mail-type=ALL
+#SBATCH -n ${TASKS}
+#SBATCH -N ${NODES}
+#SBATCH -c ${CPUS}
+#SBATCH --mail-user=${USER_E_MAIL:-lecka@liu.se}
+#SBATCH --mail-type=BEGIN
 
-source ~/.temp_modules  # Source the modules from .temp_modules in the home directory
+load_modules() {
+    if [ -n "\${MODULES+x}" ]; then
+        echo "Loading modules from MODULES variable: \${MODULES}"
+        for module in \${MODULES}; do
+            echo "Loading module: \$module"
+            module load "\$module"
+        done
+    elif [ -n "\${temp_modules+x}" ]; then
+        echo "Used modules from \${temp_modules}"
+        cat "\${temp_modules}"
+        source "\${temp_modules}"
+    fi
+}
 
-eval "\$ARGUMENTS"  # Execute the user's command
+load_modules
+
+echo "Job \$SLURM_JOB_ID for \$input is running..."
+
+start=\$(date +%s)
+
+eval "\$ARGUMENTS"
+
+echo "Job \$SLURM_JOB_ID for directory \$input is completed."
+end=\$(date +%s)
+runtime=\$((end-start))
+echo "Runtime: \$((runtime/3600)) hours and \$(((runtime%3600)/60)) minutes."
+
 EOF
-
-if [[ $DRY_RUN -eq 1 ]]; then
-    echo "Dry run mode enabled. Command to be executed:"
-    echo -e "$ARGUMENTS"
-    exit 0
-fi
 
 echo -e "Running:"
 tput setaf 5
 echo -e "$ARGUMENTS" | tee ${SLURM_HISTORY}/${JOB_NAME}_${TIMESTAMP}/command.log
 tput sgr 0
 
-echo -n "Job will start in "
 
-# Countdown before starting the job
-for ((i=3; i>0; i--)); do
-    echo -n "$i... "
-    read -t 1 -n 1 -s -r response
-    if [ $? = 0 ]; then
-        # If the user presses a key, exit with a message
-        echo -e "Operation canceled by the user."
-        exit 1
-    fi
-done
+if [[ $INTERACTIVE == 1 ]]; then
+  countdown 3
+fi
+
+temp_modules=$(get_module_file_path)
+
+export temp_modules
+echo "Used modules"
 
 echo -e "Script to run:\n $SBATCH_SCRIPT"
 chmod +x "$SBATCH_SCRIPT"
@@ -186,64 +211,11 @@ export ARGUMENTS
 JOB_ID=$(sbatch --parsable "$SBATCH_SCRIPT" || exit 1)
 start=$(date +%s)
 
-tput setaf 3
-echo -e "Job ID $JOB_ID submitted at $TIMESTAMP.\nPress 'c' at any time to cancel.\nPress 'q' at any time to stop monitoring.\nCancelling will discard the log files."
-tput sgr 0
-
-read -t 5 -n 1 input
-if [[ $input = "c" ]]; then
-    # User pressed 'c', cancel the job using scancel
-    scancel $JOB_ID
-    rm -rf ${SLURM_HISTORY}/${JOB_NAME}_${TIMESTAMP}
-    tput setaf 1
-    echo ""
-    echo "Operation canceled by the user."
-    tput sgr 0
-    exit 1
-else
-    unset input
+if [[ $INTERACTIVE == 1 ]]; then
+  interactive_mode
 fi
 
-start=$(date +%s)
+remove_if_empty "${SLURM_HISTORY}/${JOB_NAME}_${TIMESTAMP}"
 
-# Monitor job status until completion
-last_status="init"
-while is_job_active; do
-    print_job_status # Poll every -t seconds
-    read -t 5 -n 1 -s input
-    if [[ $input = "c" ]]; then
-        # User pressed 'c', cancel the job using scancel
-        scancel $JOB_ID
-        rm -rf ${SLURM_HISTORY}/${JOB_NAME}_${TIMESTAMP}
-        tput setaf 1
-        echo ""
-        echo "Operation canceled by the user."
-        tput sgr 0
-        exit 1
-    elif [[ $input = "q" ]]; then
-        # User pressed 'q', exit with status 0
-        tput setaf 1
-        echo ""
-        echo "Monitoring stopped by the user."
-        tput sgr 0
-        exit 0
-    else
-        unset input
-    fi
-done
 
-# Final job status and statistics
-echo ""
-echo "Job $JOB_ID has finished. Fetching final statistics..."
-echo ""
-
-sacct --format=elapsed,jobname,reqcpus,reqmem,state -j $JOB_ID
-end=$(date +%s)
-runtime=$((end-start))
-runtimeh=$((runtime/3600))
-runtimem=$((runtime/60))
-
-echo ""
-echo "Runtime was $runtimeh hours ($runtimem minutes)."
-echo ""
-echo -e "Job completed.\n"
+# echo -e "\033[?1000l"
