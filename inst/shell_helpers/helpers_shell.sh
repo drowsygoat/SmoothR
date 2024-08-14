@@ -26,31 +26,31 @@ function find_module_file() {
     return 1
 }
 
-# Function to find and output the module file
 function get_module_file_path() {
     local file_pattern=".*temp_modules.*"
     local search_dirs=("$PWD" "$HOME")
-    local file
-    local found_files
-    local files_array
+    local found_files=()
 
     for dir in "${search_dirs[@]}"; do
-        # Search for files matching the pattern in the specified directory, non-recursively
-        found_files=$(find "$dir" -maxdepth 1 -type f -regex "$file_pattern")
-
-        # Convert search results to an array
-        IFS=$'\n' read -r -d '' -a files_array <<< "$found_files"
+        # echo "Searching in directory: $dir"  # Debug: Show which directory is being searched
+        
+        # Capture the output of the find command
+        while IFS= read -r file; do
+            # echo "Found file: $file"  # Debug: Show each found file
+            found_files+=("$file")
+        done < <(find "$dir" -maxdepth 1 -type f -regex "$file_pattern")
 
         # Check if exactly one unique file is found
-        if [ "${#files_array[@]}" -eq 1 ]; then
-            file="${files_array[0]}"
-            echo "$file"
+        if [ "${#found_files[@]}" -eq 1 ]; then
+            echo "${found_files[@]}"
             return 0
+        elif [ "${#found_files[@]}" -gt 1 ]; then
+            echo "Multiple files found, please refine your search criteria."
+            return 1
         fi
     done
 
-    # If no unique file is found
-    echo "Error: No unique $file_pattern file found or multiple files present in the specified directories."
+    echo "Error: No unique $file_pattern file found or multiple files present in the specified directories." >&2
     return 1
 }
 
@@ -177,14 +177,60 @@ function countdown() {
 # Function to load modules
 function load_modules() {
     if [ -n "${MODULES+x}" ]; then
+        # Convert comma-separated string to array
+        IFS=',' read -ra module_array <<< "$MODULES"
+        
         echo "Loading modules from MODULES variable: ${MODULES}"
-        for module in ${MODULES}; do
+        for module in "${module_array[@]}"; do
             echo "Loading module: $module"
             module load "$module"
         done
     elif [ -n "${temp_modules+x}" ]; then
-        echo "Used modules from ${temp_modules}"
+        echo "Using modules from ${temp_modules}"
         cat "${temp_modules}"
         source "${temp_modules}"
     fi
 }
+
+# Define foreground color variables using tput
+BLACK=$(tput setaf 0)
+RED=$(tput setaf 1)
+GREEN=$(tput setaf 2)
+YELLOW=$(tput setaf 3)
+BLUE=$(tput setaf 4)
+MAGENTA=$(tput setaf 5)
+CYAN=$(tput setaf 6)
+WHITE=$(tput setaf 7)
+
+# Define bright foreground color variables using tput
+BRIGHT_BLACK=$(tput setaf 8)  # Often appears as gray
+BRIGHT_RED=$(tput setaf 9)
+BRIGHT_GREEN=$(tput setaf 10)
+BRIGHT_YELLOW=$(tput setaf 11)
+BRIGHT_BLUE=$(tput setaf 12)
+BRIGHT_MAGENTA=$(tput setaf 13)
+BRIGHT_CYAN=$(tput setaf 14)
+BRIGHT_WHITE=$(tput setaf 15)
+
+# Define background color variables using tput
+BG_BLACK=$(tput setab 0)
+BG_RED=$(tput setab 1)
+BG_GREEN=$(tput setab 2)
+BG_YELLOW=$(tput setab 3)
+BG_BLUE=$(tput setab 4)
+BG_MAGENTA=$(tput setab 5)
+BG_CYAN=$(tput setab 6)
+BG_WHITE=$(tput setab 7)
+
+# Define bright background color variables using tput
+BG_BRIGHT_BLACK=$(tput setab 8)  # Often appears as gray
+BG_BRIGHT_RED=$(tput setab 9)
+BG_BRIGHT_GREEN=$(tput setab 10)
+BG_BRIGHT_YELLOW=$(tput setab 11)
+BG_BRIGHT_BLUE=$(tput setab 12)
+BG_BRIGHT_MAGENTA=$(tput setab 13)
+BG_BRIGHT_CYAN=$(tput setab 14)
+BG_BRIGHT_WHITE=$(tput setab 15)
+
+# Reset color
+NC=$(tput sgr0)  # No Color
