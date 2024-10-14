@@ -26,7 +26,7 @@ runExpression <- function(r_expression, save = FALSE) {
   }
 
   # Prepare the command to run the expression using R
-  slurm_script_name <- "./runSmoothR.sh"  # Unchanged Slurm script name
+  slurm_script_name <- "runSmoothR.sh"  # Unchanged Slurm script name
   command <- sprintf("R -e '%s'", full_command)
 
   # Submit the command to Slurm without redirecting outputs
