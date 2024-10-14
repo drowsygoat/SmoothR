@@ -7,11 +7,11 @@
 # MODULE PARAMETERS
 RUN_COMMAND="run_shell_command.sh"
 JOB_NAME="count_arc"
-PARTITION="main"
+PARTITION="shared"
 NODES=1
-TIME="10:05:00"
+TIME="3-10:05:00"
 TASKS=1
-CPUS=1
+CPUS=30
 DRY="no"
 
 ALL_LIBS="/cfs/klemming/projects/snic/sllstore2017078/lech/RR/scAnalysis/single_cell_gal7b/libraries/cumulative_libraries.csv"
@@ -31,11 +31,11 @@ process_file() {
     $RUN_COMMAND -J "$JOB_NAME" -p "$PARTITION" -n "$TASKS" -t "$TIME" -N "$NODES" -c "$CPUS" -d "$DRY" \
     'cellranger-arc count --id=$sample \
                           --reference=$reference \
-                          --libraries=$libraries'
-
+                          --libraries=$libraries \
+                          --localcores=10 \
+                          --localmem=10'
 }
-                        #   --localcores=256 \
-                        #   --localmem=500'
+
 #########
 # PREPS #
 #########
@@ -54,7 +54,7 @@ cd "$JOB_NAME"
 
 for SAMPLE in "${SAMPLES[@]}"; do
 
-    if [[ $SAMPLE =~ ID1$|ID2$|ID3$|ID4$|ID5$ ]]; then
+    if [[ ! $SAMPLE =~ ID3$ ]]; then
         continue
     fi
 

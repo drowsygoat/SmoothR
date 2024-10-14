@@ -12,13 +12,20 @@ COMPUTE_ACCOUNT=${COMPUTE_ACCOUNT}  # Compute account variable
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
 # Clear any previous settings for these variables
-unset TASKS JOB_TIME PARTITION CPUS NODES MEMORY DRY_RUN
+unset TASKS
+unset JOB_TIME
+unset PARTITION
+unset TASKS
+unset CPUS
+unset NODES
+unset MEMORY
+unset DRY_RUN
 
 # Default values for job settings
 
 NODES="1"
 CPUS="1"
-NTASKS="1" 
+TASKS="1" 
 PARTITION="shared"
 INTERACTIVE=0
 
@@ -30,7 +37,7 @@ function display_help() {
     echo "  -t [job_time]"
     echo "  -p [core|node|shared|long|main|memory|devel]"
     echo "  -h"
-    echo "  -d [no|dry|with_eval]"
+    echo "  -d [no|dry|eval_only]"
 }
 
 # Add this at the beginning of your getopts loop
@@ -42,16 +49,13 @@ if [ $# -eq 0 ]; then
 fi
 
 # Parse command-line options using getopts
-while getopts "J:n:t:p:N:m:a:ic:d:o:" opt; do
+while getopts "J:n:t:p:N:m:a:ic:d:" opt; do
   case ${opt} in
     J )
       JOB_NAME=${OPTARG} 
       ;;
     n )
-      NTASKS=${OPTARG}  
-      ;;
-    m )
-      NTASKS_PER_NODE=${OPTARG}  
+      TASKS=${OPTARG}  
       ;;
     t )
       JOB_TIME=${OPTARG}  
@@ -70,9 +74,6 @@ while getopts "J:n:t:p:N:m:a:ic:d:o:" opt; do
       ;;
     m )
       MEMORY=${OPTARG}  
-      ;;
-    o )
-      MODULES=${OPTARG}  
       ;;
     a )
       JOB_ARRAY=${OPTARG}  
@@ -115,19 +116,14 @@ color_reset=$NC    # Reset to default terminal color
 # Display settings
 # echo -e "Here are the current settings:"
 echo -e "${color_key}Job name: ${color_value}$JOB_NAME${color_reset}"
-echo -e "${color_key}Number of tasks: ${color_value}$NTASKS${color_reset}"
+echo -e "${color_key}Number of tasks: ${color_value}$TASKS${color_reset}"
 echo -e "${color_key}Number of cpus: ${color_value}$CPUS${color_reset}"
 echo -e "${color_key}Number of nodes: ${color_value}$NODES${color_reset}"
 echo -e "${color_key}Job time: ${color_value}$JOB_TIME${color_reset}"
 echo -e "${color_key}Partition: ${color_value}$PARTITION${color_reset}"
 echo -e "${color_key}E-mail: ${color_value}$USER_E_MAIL${color_reset}"
 echo -e "${color_key}Account: ${color_value}$COMPUTE_ACCOUNT${color_reset}"
-if [[ ! -n "${DRY_RUN:-}" ]]; then
-    echo -e "${color_key}Dry run: ${color_value}No${color_reset}"
-else
-    echo -e "${color_key}Dry run: ${color_value}$DRY_RUN${color_reset}"
-fi
-
+echo -e "${color_key}Dry run: ${color_value}$DRY_RUN${color_reset}"
 
 SBATCH_SCRIPT="${SLURM_HISTORY}/${JOB_NAME}_${TIMESTAMP}/${JOB_NAME}_${TIMESTAMP}.sh"
 
@@ -139,9 +135,6 @@ if [[ $DRY_RUN == "dry" ]]; then
 elif [[ $DRY_RUN == "with_eval" ]]; then
   echo -e "Evaluating:" 
   echo -e "$ARGUMENTS"
-  echo -e "Loading modules"
-  load_modules
-  echo "Check... OK"
   eval "$ARGUMENTS"
   echo -e "Finished."
   exit 0
@@ -149,10 +142,6 @@ fi
 
 # Prepare the directory and SLURM script for the job
 mkdir -p ${SLURM_HISTORY}/${JOB_NAME}_${TIMESTAMP}
-
-
-
-
 
 # creating script file
 cat <<EOF > "$SBATCH_SCRIPT"
@@ -162,7 +151,7 @@ cat <<EOF > "$SBATCH_SCRIPT"
 #SBATCH -o ${SLURM_HISTORY}/%x_${TIMESTAMP}/%x_%j_${TIMESTAMP}.out
 #SBATCH -t ${JOB_TIME}
 #SBATCH -p ${PARTITION}
-#SBATCH -n ${NTASKS}
+#SBATCH -n ${TASKS}
 #SBATCH -N ${NODES}
 #SBATCH -c ${CPUS}
 #SBATCH --mail-user=${USER_E_MAIL:-lecka@liu.se}
@@ -174,11 +163,7 @@ if [ -n "${MEMORY:-}" ]; then
 fi
 
 if [ -n "${JOB_ARRAY:-}" ]; then
-  echo "#SBATCH -array ${JOB_ARRAY}" >> "$SBATCH_SCRIPT"
-fi
-
-if [ -n "${NTASKS_PER_NODE:-}" ]; then
-  echo "#SBATCH --ntasks-per-node ${NTASKS_PER_NODE}" >> "$SBATCH_SCRIPT"
+  echo "#SBATCH -a ${JOB_ARRAY}" >> "$SBATCH_SCRIPT"
 fi
 
 cat <<EOF >> "$SBATCH_SCRIPT"
@@ -191,10 +176,6 @@ end=\$(date +%s)
 runtime=\$((end-start))
 echo "Runtime: \$((runtime/3600)) hours and \$(((runtime%3600)/60)) minutes."
 EOF
-
-
-
-
 
 # echo -e "\nRunning:"
 echo ${BRIGHT_MAGENTA}
@@ -218,7 +199,6 @@ fi
 
 # Check if the MODULES variable is set and export it
 if [ -n "$MODULES" ]; then
-    echo $MODULES
     export MODULES
 fi
 
@@ -231,12 +211,8 @@ export -f load_modules
 echo -e "Script to run:\n $SBATCH_SCRIPT"
 chmod +x "$SBATCH_SCRIPT"
 
-JOB_ID=$(sbatch --parsable "$SBATCH_SCRIPT")
-
-if [ -z "$JOB_ID" ]; then
-    echo "Failed to submit job. Please check the SLURM script for errors."
-    exit 1
-fi
+JOB_ID=$(sbatch --parsable "$SBATCH_SCRIPT" || exit 1)
+start=$(date +%s)
 
 if [[ $INTERACTIVE == 1 ]]; then
   interactive_mode

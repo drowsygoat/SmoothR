@@ -5,13 +5,21 @@
 
 # MODULE PARAMETERS
 RUN_COMMAND="run_shell_command.sh"
-JOB_NAME="mkref_arc"
-PARTITION="shared"
+JOB_NAME="mkref"
+PARTITION="main"
 NODES=1
 TIME="23:05:00"
-TASKS=10
+TASKS=1
 CPUS=1
 DRY="no"
+
+if [ -d "$JOB_NAME" ]; then
+    echo "Error: Directory $JOB_NAME already exists." >&2
+    exit 1
+else
+    mkdir -p "$JOB_NAME"
+fi
+
 
 GTF="/cfs/klemming/projects/snic/sllstore2017078/lech/sarek/refs/112/gtf/Gallus_gallus.bGalGal1.mat.broiler.GRCg7b.112.gtf.gz"
 
@@ -23,11 +31,10 @@ PREPARED_GTF="prepared.gtf"
 
 UNZIPPED="${FASTA%.gz}"
 
+# this keeps the gzipped file, -c directs to stdout
 if [ ! -f "$UNZIPPED" ]; then
     unpigz -c "$FASTA" > "$UNZIPPED"
 fi
-
-# cellranger-arc mkgtf $GTF $PREPARED_GTF
 
 cat <<EOF > "$CONFIG"
 {
@@ -53,4 +60,6 @@ process_file() {
     'cellranger-arc mkref --config=$input --nthreads=10'
 }
 
+cd  "$JOB_NAME"
+cellranger-arc mkgtf $GTF $PREPARED_GTF
 process_file $CONFIG 

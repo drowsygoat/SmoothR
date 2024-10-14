@@ -91,15 +91,12 @@ plot1 <- ggplot(plotdata_trans_hotspots_combined[unique_peaks > 9, ], aes(x = un
     labs(title = "Histogram of Unique Peaks per Hotspot", x = "Number of Unique Peaks", y = "Frequency") +
     ylim(c(0,upper_limit))
 
-
 plot1lim <- ggplot(plotdata_trans_hotspots_combined[unique_peaks > 9, ], aes(x = unique_peaks)) +
     geom_histogram(binwidth = 1, alpha = 1, position = "dodge") +
     facet_wrap(~sample, scales = "fixed", ncol = 1) +
     scale_y_log10() +
     labs(title = "Histogram of Unique Peaks Frequency per Hotspot", x = "Number of Unique Peaks", y = "Frequency") +
     ylim(c(0,upper_limit)) 
-
-
 
 plot1sqrt <- ggplot(plotdata_trans_hotspots_combined[unique_peaks > 9, ], aes(x = unique_peaks)) +
     geom_histogram(binwidth = 1, alpha = 1 position = "dodge") +

@@ -3,7 +3,7 @@
 # Script to setup and submit SLURM jobs for each directory with R script execution.
 
 # Default values for job settings
-NUM_THREADS="1"  # Default to 1 thread unless specified
+TASKS="1"  # Default to 1 thread unless specified
 JOB_TIME="01:00:00"  # Default job time (1 hour)
 PARTITION="devel"  # Default partition is 'devel'
 JOB_NAME="MEQTL_job_$TIMESTAMP"  # Default job name includes a timestamp
@@ -12,19 +12,22 @@ JOB_NAME="MEQTL_job_$TIMESTAMP"  # Default job name includes a timestamp
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
 # Parse command-line options using getopts
-while getopts "J:n:t:p:" opt; do
+while getopts "J:n:t:p:N:" opt; do
   case ${opt} in
     J )
       JOB_NAME=${OPTARG}  # Job name specified with -J option
       ;;
     n )
-      NUM_THREADS=${OPTARG}  # Number of threads specified with -n option
+      TASKS=${OPTARG}  # Number of threads specified with -n option
       ;;
     t )
       JOB_TIME=${OPTARG}  # Job time duration specified with -t option
       ;;
     p )
       PARTITION=${OPTARG}  # Partition specified with -p option
+      ;;
+    N )
+      NODES=${OPTARG}  # Partition specified with -p option
       ;;
     # p )
     #   PARTITION=${OPTARG}  # Partition specified with -p option
@@ -51,12 +54,15 @@ shift 1
 # shellcheck disable=SC2124
 ARGUMENTS="$@"
 
-if [[ $1 -eq 0 ]]; then
-    echo "Usage: $0 <directory_path>"
-    exit 1
-fi
+# if [[ $1 -eq 0 ]]; then
+#     echo "Usage: $0 <directory_path>"
+#     exit 1
+# fi
 
 snp_path="$1"
+features_path="$2"
+snp_loc_path="$3"
+features_loc_path="$4"
 
 if [ ! -d "$snp_path" ]; then
     echo "Error: Directory '$snp_path' does not exist."
@@ -116,7 +122,7 @@ if [[ -f "$module_file" ]]; then
     echo "Module file used: $module_file with the following modules:"
     cat "$module_file"
 else
-    echo "No module file found or error occurred."
+    echo "No module file found or error occurred. Modules will not be loaded"
 fi
 
 # Get the current directory
@@ -138,7 +144,7 @@ mkdir -p "$output_dir_r"
 
 # improve it by making a function to find files in in directory matching pattern and adding them to array
 
-mapfile -t snp_files < <(find "$snp_path" -maxdepth 1 -type f -regex ".*chunk_[0-9]+_SNPs.*")
+# mapfile -t snp_files < <(find "$snp_path" -maxdepth 1 -type f -regex ".*chunk_[0-9]+_SNPs.*")
 
 # echo "${snp_files[@]}"
 counter=0
@@ -146,44 +152,48 @@ counter=0
 # Loop through each stored directory
 for dir in "${directories[@]}"; do
     echo "Processing directory: $dir"
+    if [[ ! $dir =~ group_[0-4]_results ]]; then
+        #((counter++))
+        continue
+    fi
+    sleep 1
+
     # Find all files recursively in the directory
     # files=$(find "$dir" -type f)
     # files_array=($files) # Convert to an array
-    mapfile -t feature_files < <(find ./${dir} -maxdepth 1 -type f -regex ".*chunk.*[0-9].*MEQTL.rds")
+    # mapfile -t feature_files < <(find ./${dir} -maxdepth 1 -type f -regex ".*chunk.*[0-9].*MEQTL.rds")
 
-    ((counter++))
-
-    for snp_file in "${snp_files[@]}"; do
-        # Construct the location file path by inserting '_loc' in the appropriate position
-        loc_file="${snp_file/SNPs_VK_fixed_colnames.txt/loc_SNPs_VK_fixed_colnames.txt}"
-        chunk_snp=$(echo "$snp_file" | grep -oE "chunk_[0-9]+")
+    # for snp_file in "${snp_files[@]}"; do
+    #     # Construct the location file path by inserting '_loc' in the appropriate position
+    #     loc_file="${snp_file/SNPs_VK_fixed_colnames.txt/loc_SNPs_VK_fixed_colnames.txt}"
+    #     chunk_snp=$(echo "$snp_file" | grep -oE "chunk_[0-9]+")
 
     # Check if both files exist
-        if [ -f "$snp_file" ] && [ -f "$loc_file" ]; then
-            echo ""
-            echo "SNP file: $snp_file"
-            echo "SNP location file: $loc_file"
-            echo "SNP chunk: $chunk_snp"
-            for feature_file in "${feature_files[@]}"; do
-                loc_feature=$(echo "$feature_file" | sed -E 's/group_[0-9]+_//g; s/input/loc_input/' | xargs basename)
-                chunk_feature=$(echo "$feature_file" | grep -oE "chunk.*[0-9]+")
+        # if [ -f "$snp_file" ] && [ -f "$loc_file" ]; then
+        #     echo ""
+        #     echo "SNP file: $snp_file"
+        #     echo "SNP location file: $loc_file"
+        #     echo "SNP chunk: $chunk_snp"
+        #     for feature_file in "${feature_files[@]}"; do
+        #         loc_feature=$(echo "$feature_file" | sed -E 's/group_[0-9]+_//g; s/input/loc_input/' | xargs basename)
+        #         chunk_feature=$(echo "$feature_file" | grep -oE "chunk.*[0-9]+")
 
-                if [ -f "$loc_feature" ] && [ -f "$feature_file" ]; then
-                    echo ""
-                    echo "Feature file: $feature_file"
-                    echo "Feature location file: $loc_feature"
-                    echo "Feature chunk: $chunk_feature"
+        #         if [ -f "$loc_feature" ] && [ -f "$feature_file" ]; then
+        #             echo ""
+        #             echo "Feature file: $feature_file"
+        #             echo "Feature location file: $loc_feature"
+        #             echo "Feature chunk: $chunk_feature"
                     
 
-                    if [[ $counter == 2 ]]; then
-                        #((counter++))
-                        exit 0
-                    fi
+        #             if [[ $counter == 2 ]]; then
+        #                 #((counter++))
+        #                 exit 0
+        #             fi
 
-                    if [[ $chunk_snp != "chunk_2" ]]; then
-                        #((counter++))
-                        continue
-                    fi
+        #             if [[ $chunk_snp != "chunk_2" ]]; then
+        #                 #((counter++))
+        #                 continue
+        #             fi
 
                     # if [[ $counter == 10 ]]; then
                     #     #((counter++))
@@ -194,9 +204,9 @@ for dir in "${directories[@]}"; do
                     #     #((counter++))
                     #     continue
                     # fi
+                     
                     
-                    
-                    export R_SCRIPT ARGUMENTS dir module_file output_dir_r TIMESTAMP snp_file loc_file loc_feature feature_file chunk_feature chunk_snp # some arguments can be removed
+                    export R_SCRIPT ARGUMENTS dir module_file output_dir_r TIMESTAMP snp_file loc_file loc_feature feature_file chunk_feature chunk_snp snp_path features_path snp_loc_path features_loc_path TASKS # some arguments can be removed
 
                     # Submit a Slurm job for each directory
                     JOB_ID=$(sbatch <<-EOT
@@ -204,19 +214,23 @@ for dir in "${directories[@]}"; do
 #SBATCH -A ${COMPUTE_ACCOUNT}
 #SBATCH -J ${JOB_NAME}_${dir}_${chunk_snp}_${chunk_feature}
 #SBATCH -o slurm_reports/%x_%j_${TIMESTAMP}.out
-#SBATCH -t $JOB_TIME
-#SBATCH -p $PARTITION
-#SBATCH -n $NUM_THREADS
+#SBATCH -t ${JOB_TIME}
+#SBATCH -N ${NODES}
+#SBATCH -p ${PARTITION}
+#SBATCH -n ${TASKS}
 #SBATCH --mail-user=YOUR_EMAIL # Replac e YOUR_EMAIL with your email
 #SBATCH --mail-type=ALL
 #SBATCH --parsable
 
-source \$module_file
+# source \$module_file
+module load PDC/23.12 R/4.4.0 harfbuzz fribidi libpng libtiff libjpeg-turbo
 
 echo "Job \$SLURM_JOB_ID for directory \$dir is running..."
 start=\$(date +%s)
 
-./\$R_SCRIPT \$dir \$NUM_THREADS \$snp_file \$loc_file \$feature_file \$loc_feature 2>&1 > \$output_dir_r/R_out_\${dir}_\${chunk_snp}_\${chunk_feature}_\${TIMESTAMP}.log 
+# ./\$R_SCRIPT \$dir \$TASKS \$snp_file \$loc_file \$feature_file \$loc_feature 2>&1 > \$output_dir_r/R_out_\${dir}_\${chunk_snp}_\${chunk_feature}_\${TIMESTAMP}.log 
+
+./\$R_SCRIPT \$dir \$TASKS \$snp_path \$snp_loc_path \$features_path \$features_loc_path 2>&1 > \$output_dir_r/R_out_\${dir}_\${chunk_snp}_\${chunk_feature}_\${TIMESTAMP}.log 
 
 echo "Job \$SLURM_JOB_ID for directory \$dir completed."
 end=\$(date +%s)
@@ -225,25 +239,25 @@ echo "Runtime: \$((runtime/3600)) hours and \$(((runtime%3600)/60)) minutes."
 
 EOT
                     )
-                else
-                    echo "Missing files."
-                fi
-                echo -e "Job ID $JOB_ID for $dir and $(basename $snp_file) submitted.\n" | tee >> fork_output.log
+    #             else
+    #                 echo "Missing files."
+    #             fi
+    #             echo -e "Job ID $JOB_ID for $dir and $(basename $snp_file) submitted.\n" | tee >> fork_output.log
 
-                read -t 1 -n 1 input
+    #             read -t 1 -n 1 input
 
-                if [[ $input = "c" ]]; then
-                    tput setaf 1
-                    echo ""
-                    echo "Operation stopped by the user."
-                    tput sgr 0
-                    exit 1
-                else
-                    unset input
-                fi
-            done
-        fi
-    done
+    #             if [[ $input = "c" ]]; then
+    #                 tput setaf 1
+    #                 echo ""
+    #                 echo "Operation stopped by the user."
+    #                 tput sgr 0
+    #                 exit 1
+    #             else
+    #                 unset input
+    #             fi
+    #         done
+    #     fi
+    # done
 done
 
 echo "All jobs submitted."

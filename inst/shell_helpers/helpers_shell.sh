@@ -128,10 +128,6 @@ function interactive_mode() {
     echo ""
 
     sacct --format=elapsed,jobname,reqcpus,reqmem,state -j $JOB_ID
-    end=$(date +%s)
-    runtime=$((end-start))
-    runtimeh=$((runtime/3600))
-    runtimem=$((runtime/60))
 
     echo ""
     echo "Runtime was $runtimeh hours ($runtimem minutes)."
