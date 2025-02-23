@@ -37,7 +37,9 @@ runExpression <- function(r_expression, save = FALSE) {
   Sys.chmod(script_file, mode = "0755")
 
   # Prepare the command to run the expression using R
-  slurm_script_name <- "./runSmoothR.sh"
+
+  slurm_script_name <- "runSmoothR.sh"  # Unchanged Slurm script name
+  command <- sprintf("R -e '%s'", full_command)
 
   # Submit the command to Slurm with the path to the script file
   tryCatch({

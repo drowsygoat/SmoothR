@@ -203,7 +203,7 @@ else
 
 source \$module_file
 
-./\$R_SCRIPT \$OUTPUT_DIR \$R_SCRIPT \$SUFFIX \$TIMESTAMP \$NUM_THREADS \$ARGUMENTS 2>&1 | tee R_console_output/R_out_\$R_SCRIPT_\$TIMESTAMP.log >> R_console_output/R_sink.log # sink gets cumulative output, so it gets messy then mutiple runs run in the same time
+./\$R_SCRIPT \$OUTPUT_DIR \$R_SCRIPT \$SUFFIX \$TIMESTAMP \$NUM_THREADS \$ARGUMENTS 2>&1 | tee R_console_output/R_output_\$TIMESTAMP.log >> R_console_output/R_output_cumulative.log
 EOF
 
 fi

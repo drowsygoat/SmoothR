@@ -33,7 +33,7 @@ library(SmoothR)
 
 # Script Activation
 
-- `initSmoothR()`**: Initializes project.
+- `initSmoothR()`: Initializes project.
 
 # Environment Configuration
 
